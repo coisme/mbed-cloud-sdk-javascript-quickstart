@@ -1,26 +1,27 @@
 {
-  "name": "mbed-connector-node-quickstart",
-  "version": "2.0.0",
-  "description": "Quickstart example for using the mbed Device Connector Node.js library.",
+  "name": "mbed-cloud-sdk-javascript-quickstart",
+  "version": "1.0.0",
+  "description": "Quickstart example for using the mbed Cloud javascript library.",
+  "license": "Apache-2.0",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": {
-    "name": "Brian Daniels",
-    "email": "brian.daniels@arm.com"
+    "name": "Michael Ray",
+    "email": "michael.ray@arm.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ARMmbed/mbed-connector-api-node-quickstart.git"
+    "url": "https://github.com/mray19027/mbed-cloud-sdk-javascript-quickstart"
   },
   "dependencies": {
     "async": "^1.5.2",
     "dotenv": "^2.0.0",
     "express": "^4.13.3",
     "hbs": "~3.1.0",
-    "mbed-connector-api": "^2.0.0",
-    "socket.io": "^1.4.5"
+    "socket.io": "^1.4.5",
+    "mbed-cloud-sdk-javascript": "../mbed-cloud-sdk-javascript"
   }
 }

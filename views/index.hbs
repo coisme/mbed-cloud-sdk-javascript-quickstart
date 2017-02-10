@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>mbed Device Connector Webapp Quickstart</title>
+    <title>mbed Cloud Webapp Quickstart</title>
 
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/foundation.min.css">
@@ -28,13 +28,13 @@
         </div>
       </div>
     </div>
-    <div id="endpoints">
-    {{#each endpoints}}
-      <div class="row" id="{{name}}">
+    <div id="devices">
+    {{#each devices}}
+      <div class="row" id="{{id}}">
         <div class="small-12 columns">
           <div class="row">
             <div class="small-12 columns">
-              <h2>{{name}}</h2>
+              <h2>{{id}}</h2>
             </div>
           </div>
           <div class="row">
@@ -64,7 +64,7 @@
       <div class="small-12 columns">
         <div class="row">
           <div class="small-12 columns">
-            <h2>No endpoints connected</h2>
+            <h2>No devices connected</h2>
           </div>
         </div>
       </div>
@@ -78,25 +78,25 @@
       $(function() {
         var socket = io();
 
-        $('#endpoints').children().each(function(index, element) {
+        $('#devices').children().each(function(index, element) {
           var _this = $(this);
           _this.find('.subscribe-presses').change(function() {
             if ($(this).is(":checked")) {
               _this.find('.get-presses').prop('disabled', true);
               socket.emit('subscribe-to-presses', {
-                endpointName: _this.attr('id')
+                device: _this.attr('id')
               });
             } else {
               _this.find('.get-presses').prop('disabled', false);
               socket.emit('unsubscribe-to-presses', {
-                endpointName: _this.attr('id')
+                device: _this.attr('id')
               });
             }
           });
 
           _this.find('.get-presses').on('click', function() {
             socket.emit('get-presses', {
-              endpointName: _this.attr('id')
+              device: _this.attr('id')
             });
           });
 
@@ -106,7 +106,7 @@
 
           _this.find('.update-blink-pattern').on('click', function() {
             socket.emit('update-blink-pattern', {
-              endpointName: _this.attr('id'),
+              device: _this.attr('id'),
               blinkPattern: _this.find('.blink-pattern').val()
             });
 
@@ -115,7 +115,7 @@
 
           _this.find('.blink').on('click', function() {
             socket.emit('blink', {
-              endpointName: _this.attr('id')
+              device: _this.attr('id')
             });
           });
         });
@@ -123,7 +123,7 @@
 
         socket.on('presses', function (data) {
           console.log('presses', data);
-          $('#' + data.endpointName + ' .presses-value').html(data.value);
+          $('#' + data.device + ' .presses-value').html(data.value);
         });
 
         socket.on('subscribed-to-presses', function (data) {
