@@ -1,4 +1,4 @@
-# mbed Device Connector Node.js Quickstart
+# mbed Cloud Node.js Quickstart
 
 Example Node.js express app that talks to the mbed Device Connector.
 
@@ -20,12 +20,6 @@ If you see an number output similar to x.x.x for each command, then they are bot
 To install on Windows or Mac, you can download the installer [here](https://nodejs.org/en/download).
 
 To install on Linux, you can use a package manager. Instructions for installing Node.js on your distribution can be found [here](https://nodejs.org/en/download/package-manager)
-
-### Running mbed Client
-
-This example assumes that you have an mbed Client connected to mbed Device Connector.
-
-If you have an mbed, you can use the [mbed Client Example](https://github.com/ARMmbed/mbed-os-example-client).
 
 ## Configuring the App
 
@@ -62,18 +56,13 @@ node app.js
 You should receive the following output:
 
 ```
-mbed Device Connector Quickstart listening at http://localhost:8080
+mbed Cloud Quickstart listening at http://localhost:8080
 ```
 
 Copy and paste the printed URL into your browser and you should see a page listing all of your connected mbed Clients.
-
-See the instructions in the [mbed Client example](https://github.com/ARMmbed/mbed-os-example-client#testing-the-application) testing section to update the endpoint's button resource.
 
 ## Appendix
 
 ### Creating an Access Key
 
-1. Login to your account at [https://connector.mbed.com](https://connector.mbed.com).
-2. Under **My applications**, click **Access keys**.
-3. Click **Create New Access Key**. When prompted, enter a name for the access key (ex. "Quickstart") and click **ADD**.
-4. Copy the access key you just created and use it when you're [configuring your app](#configuring-the-app).
+1. Login to your account at [https://portal.mbedcloud.com/access/keys).
