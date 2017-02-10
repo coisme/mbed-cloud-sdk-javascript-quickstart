@@ -73,6 +73,16 @@ var sockets = [];
 var server = http.Server(app);
 var io = ioLib(server);
 
+// Callback for when the button is pressed and the subscription service catches the button callback
+function buttonPressed(device, payload) {
+  sockets.forEach(function(socket) {
+    socket.emit('presses', {
+      device: device,
+      value: payload
+    });
+  });
+}
+
 // Setup sockets for updating web UI
 io.on('connection', function (socket) {
   // Add new client to array of client upon connection
@@ -80,7 +90,7 @@ io.on('connection', function (socket) {
 
   socket.on('subscribe-to-presses', function (data) {
     // Subscribe to all changes of resource /3200/0/5501 (button presses)
-    deviceApi.addResourceSubscription({id: data.device, path: buttonResourceURI}, function(error) {
+    deviceApi.addResourceSubscription({fn: function(payload) { buttonPressed(data.device, payload); }, id: data.device, path: buttonResourceURI}, function(error) {
       if (error) throw error;
       socket.emit('subscribed-to-presses', {
         device: data.device
@@ -130,20 +140,6 @@ io.on('connection', function (socket) {
       sockets.splice(index, 1);
     }
   })
-});
-
-// When notifications are received through the notification channel, pass the
-// button presses data to all connected browser windows
-deviceApi.on('notification', function(notification) {
-  console.log("HERE: " + notification);
-  if (notification.path === buttonResourceURI) {
-    sockets.forEach(function(socket) {
-      socket.emit('presses', {
-        device: notification.ep,
-        value: notification.payload
-      });
-    });
-  }
 });
 
 // Start the app
