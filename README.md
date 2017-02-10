@@ -1,4 +1,4 @@
-# mbed Device Connector Node.js Quickstart
+# mbed Cloud Node.js Quickstart
 
 Example Node.js express app that talks to the mbed Device Connector.
 
