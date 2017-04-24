@@ -19,7 +19,7 @@ var blinkPatternResourceURI = '/3201/0/5853';
 var buttonResourceURI = '/3200/0/5501';
 
 // Instantiate an mbed Cloud device API object
-var deviceApi = new mbed.DevicesApi({
+var connectApi = new mbed.ConnectApi({
     apiKey: accessKey
 });
 
@@ -31,13 +31,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function (req, res) {
   // Get all of the devices and necessary info to render the page
-  deviceApi.listConnectedDevices(function(error, devices) {
+  connectApi.listConnectedDevices(function(error, devices) {
     if (error) throw error;
     else {
       // Setup the function array
-      var functionArray = devices.data.map(function(device) {
+      var functionArray = devices.map(function(device) {
         return function(mapCallback) {
-          deviceApi.getResourceValue({id: device.id, path: blinkPatternResourceURI}, function(error, value) {
+          connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
             device.blinkPattern = value;
             mapCallback(error);
           });
@@ -51,7 +51,7 @@ app.get('/', function (req, res) {
           res.send(String(error));
         } else {
           res.render('index', {
-            devices: devices.data
+            devices: devices
           });
         }
       });
@@ -90,17 +90,19 @@ io.on('connection', function (socket) {
 
   socket.on('subscribe-to-presses', function (data) {
     // Subscribe to all changes of resource /3200/0/5501 (button presses)
-    deviceApi.addResourceSubscription({fn: function(payload) { buttonPressed(data.device, payload); }, id: data.device, path: buttonResourceURI}, function(error) {
+    connectApi.addResourceSubscription(data.device, buttonResourceURI, function(error) {
       if (error) throw error;
       socket.emit('subscribed-to-presses', {
         device: data.device
       });
+    }, function(payload) { 
+      buttonPressed(data.device, payload); 
     });
   });
 
   socket.on('unsubscribe-to-presses', function(data) {
     // Unsubscribe from the resource /3200/0/5501 (button presses)
-    deviceApi.deleteResourceSubscription({id: data.device, path: buttonResourceURI}, function(error) {
+    connectApi.deleteResourceSubscription(data.device, buttonResourceURI, function(error) {
       if (error) throw error;
       socket.emit('unsubscribed-to-presses', {
         device: data.device
@@ -110,7 +112,7 @@ io.on('connection', function (socket) {
 
   socket.on('get-presses', function(data) {
     // Read data from GET resource /3200/0/5501 (num button presses)
-    deviceApi.getResourceValue({id: data.device, path: buttonResourceURI}, function(error, value) {
+    connectApi.getResourceValue(data.device, buttonResourceURI, function(error, value) {
       if (error) throw error;
       socket.emit('presses', {
         device: data.device,
@@ -121,14 +123,14 @@ io.on('connection', function (socket) {
 
   socket.on('update-blink-pattern', function(data) {
     // Set data on PUT resource /3201/0/5853 (pattern of LED blink)
-    deviceApi.setResourceValue({id: data.device, path: blinkPatternResourceURI, value: data.blinkPattern}, function(error) {
+    connectApi.setResourceValue(data.device, blinkPatternResourceURI, data.blinkPattern, function(error) {
       if (error) throw error;
     });
   });
 
   socket.on('blink', function(data) {
     // POST to resource /3201/0/5850 (start blinking LED)
-    deviceApi.executeResource({id: data.device, path: blinkResourceURI}, function(error) {
+    connectApi.executeResource(data.device, blinkResourceURI, function(error) {
       if (error) throw error;
     });
   });
@@ -145,7 +147,7 @@ io.on('connection', function (socket) {
 // Start the app
 server.listen(port, function() {
   // Set up the notification channel (pull notifications)
-  deviceApi.startNotifications(function(error, data) {
+  connectApi.startNotifications(function(error) {
     if (error) throw error;
     else {
       console.log('mbed Cloud Quickstart listening at http://localhost:%s', port);
