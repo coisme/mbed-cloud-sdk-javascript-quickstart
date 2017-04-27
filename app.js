@@ -16,7 +16,7 @@ var port = process.env.PORT || 8080;
 // Paths to resources on the devices
 var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
-var buttonResourceURI = '/3200/0/5501';
+var buttonResourceURI = '/3201/0/5501';
 
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
@@ -32,18 +32,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function (req, res) {
   // Get all of the devices and necessary info to render the page
   connectApi.listConnectedDevices(function(error, devices) {
+    var updated_devices = [];
     if (error) throw error;
     else {
       // Setup the function array
       var functionArray = devices.map(function(device) {
         return function(mapCallback) {
           connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
-            device.blinkPattern = value;
-            mapCallback(error);
+            if (error) {
+              mapCallback(null);
+            } else {
+              device.blinkPattern = value;
+              updated_devices.push(device);
+              mapCallback(null);
+            }
           });
         };
       });
-
       // Fetch all blink patterns in parallel, finish when all HTTP
       // requests are complete (uses Async.js library)
       async.parallel(functionArray, function(error) {
@@ -51,7 +56,7 @@ app.get('/', function (req, res) {
           res.send(String(error));
         } else {
           res.render('index', {
-            devices: devices
+            devices: updated_devices
           });
         }
       });
