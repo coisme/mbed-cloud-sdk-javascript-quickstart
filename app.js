@@ -16,10 +16,13 @@ var port = process.env.PORT || 8080;
 // Paths to resources on the devices
 var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
-var buttonResourceURI = '/3201/0/5501';
+var buttonResourceURI = '/3200/0/5501';
 
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
+    apiKey: accessKey
+});
+var deviceApi = new mbed.DeviceDirectoryApi({
     apiKey: accessKey
 });
 
@@ -31,21 +34,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function (req, res) {
   // Get all of the devices and necessary info to render the page
-  connectApi.listConnectedDevices(function(error, devices) {
-    var updated_devices = [];
+  var options = {filter: {description:"Quickstart"}};
+  deviceApi.listDevices(options, function(error, devices) {
     if (error) throw error;
     else {
       // Setup the function array
-      var functionArray = devices.map(function(device) {
+      var functionArray = devices.data.map(function(device) {
         return function(mapCallback) {
           connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
-            if (error) {
-              mapCallback(null);
-            } else {
-              device.blinkPattern = value;
-              updated_devices.push(device);
-              mapCallback(null);
-            }
+            mapCallback(error);
+            device.blinkPattern = value;
           });
         };
       });
@@ -56,7 +54,7 @@ app.get('/', function (req, res) {
           res.send(String(error));
         } else {
           res.render('index', {
-            devices: updated_devices
+            devices: devices.data
           });
         }
       });
