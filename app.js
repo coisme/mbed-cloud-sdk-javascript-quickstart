@@ -22,9 +22,6 @@ var buttonResourceURI = '/3200/0/5501';
 var connectApi = new mbed.ConnectApi({
     apiKey: accessKey
 });
-var deviceApi = new mbed.DeviceDirectoryApi({
-    apiKey: accessKey
-});
 
 // Create the express app
 var app = express();
@@ -34,12 +31,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function (req, res) {
   // Get all of the devices and necessary info to render the page
-  var options = {filter: {description:"Quickstart"}};
-  deviceApi.listDevices(options, function(error, devices) {
+  connectApi.listConnectedDevices("quickstart", function(error, devices) {
     if (error) throw error;
     else {
       // Setup the function array
-      var functionArray = devices.data.map(function(device) {
+      var functionArray = devices.map(function(device) {
         return function(mapCallback) {
           connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
             mapCallback(error);
@@ -54,7 +50,7 @@ app.get('/', function (req, res) {
           res.send(String(error));
         } else {
           res.render('index', {
-            devices: devices.data
+            devices: devices
           });
         }
       });
