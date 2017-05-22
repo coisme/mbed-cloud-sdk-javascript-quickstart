@@ -1,0 +1,7 @@
+{
+  "name": "mbed Cloud Quickstart App",
+  "description": "A quickstart demo app to control IoT devices using mbed Cloud",
+  "repository": "https://github.com/ARMmbed/mbed-cloud-sdk-javascript-quickstart",
+  "logo": "https://connector.mbed.com/img/ARMmbedLogo.svg",
+  "keywords": ["ARM mbed", "mbed cloud", "cloud", "IoT"]
+}
