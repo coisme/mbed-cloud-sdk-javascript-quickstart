@@ -1,139 +1,251 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+<title>mbed Cloud Quickstart</title>
+<meta charset="UTF-8">
 
-    <title>mbed Cloud Webapp Quickstart</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/foundation.min.css">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <!--[if lt IE 9]>
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="row margin">
-      <div class="small-12 columns">
-        <div><img src="img/ARMmbedLogo.png" alt="ARM mbed"></div>
-      </div>
-    </div>
-    <div class="blueband">
-      <div class="row">
-        <div class="small-12 columns">
-          <h1>Webapp Quickstart</h1>
-        </div>
-      </div>
-    </div>
-    <div id="devices">
-    {{#each devices}}
-      <div class="row" id="{{id}}">
-        <div class="small-12 columns">
-          <div class="row">
-            <div class="small-12 columns">
-              <h2>{{id}}</h2>
-            </div>
-          </div>
-          <div class="row">
-            <div class="small-12 medium-6 columns">
-              <h4>Presses: <span class="presses-value">Unknown</span></h4>
-              <label><input type="checkbox" class="subscribe-presses"> Subscribe</label>
-              <button class="get-presses">GET</button>
-            </div>
-            <div class="small-12 medium-6 columns">
-              <h4>LED Blink Pattern</h4>
-              <div>
-                <input type="text" value="{{blinkPattern}}" class="blink-pattern">
-              </div>
-              <div class="row">
-                <div class="small-6 columns">
-                  <button class="update-blink-pattern">Update (PUT)</button>
+<style>
+body, h1,h2,h3,h4,h5,h6 {
+    font-family: "Montserrat", sans-serif
+}
+
+.w3-row-padding img {
+    margin-bottom: 12px
+}
+
+/* Set the width of the sidebar to 120px */
+.w3-sidebar {
+    width: 120px;background: #222;
+}
+
+/* Add a left margin to the "page content" that matches the width of the sidebar (120px) */
+#main {
+    margin-left: 120px
+}
+
+/* Remove margins from "page content" on small screens */
+@media only screen and (max-width: 600px) {
+    #main {margin-left: 0}
+}
+</style>
+
+<body class="w3-black">
+
+<!-- Icon Bar (Sidebar - hidden on small screens) -->
+<nav class="w3-sidebar w3-bar-block w3-small w3-hide-small w3-center">
+  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-black" id="connect_nav">
+    <i class="fa fa-globe w3-xxlarge"></i>
+    <p>Connect</p>
+  </a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-hover-black" id="update_nav">
+    <i class="fa fa-lock w3-xxlarge"></i>
+    <p>Update</p>
+  </a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-hover-black" id="provision_nav">
+    <i class="fa fa-handshake-o w3-xxlarge"></i>
+    <p>Provision</p>
+  </a>
+</nav>
+
+<!-- Navbar on small screens (Hidden on medium and large screens) -->
+<div class="w3-top w3-hide-large w3-hide-medium" id="navbar">
+  <div class="w3-bar w3-black w3-opacity w3-hover-opacity-off w3-center w3-small">
+    <a href="#" class="w3-bar-item w3-button" style="width:25% !important">Connect</a>
+    <a href="#" class="w3-bar-item w3-button" style="width:25% !important">Update</a>
+    <a href="#" class="w3-bar-item w3-button" style="width:25% !important">Provision</a>
+  </div>
+</div>
+
+<!-- Page Content -->
+<div class="w3-padding-large" id="main">
+    <!-- Header/Home -->
+    <header class="w3-container w3-padding-32 w3-center w3-black" id="quickstart">
+        <h1 class="w3-xxxlarge"><span class="w3-hide-small">mbed Cloud Quickstart</h1>
+    </header>
+
+    <div class="w3-content w3-justify w3-text-grey w3-padding-32" id="connect">
+        <h2 class="w3-text-light-grey">Connect API</h2>
+
+        <div id="devices">
+        {{#each devices}}
+
+            <div class="w3-card-4 w3-white w3-center w3-margin-bottom" style="margin:0 -16px" id="{{id}}">
+                <header class="w3-container w3-dark-grey">
+                    <h2>{{id}}</h2>
+                </header>
+                <div class="w3-container">
+                    <div class="w3-container w3-padding-16 w3-half w3-white">
+                        <h4>Presses: <span class="presses-value">Unknown</span></h4>
+                        <label><input type="checkbox" class="subscribe-presses"> Subscribe</label>
+                        <button class="get-presses">GET</button>
+                    </div>
+                    <div class="w3-container w3-padding-16 w3-half w3-white">
+                        <h4>LED Blink Pattern</h4>
+                        <input type="text" value="{{blinkPattern}}" class="blink-pattern w3-half">
+                        <button class="update-blink-pattern w3-quarter">Update (PUT)</button>
+                        <button class="blink w3-quarter">Blink (POST)</button>
+                    </div>
                 </div>
-                <div class="small-6 columns text-right">
-                  <button class="blink">Blink (POST)</button>
-                </div>
-              </div>
             </div>
-          </div>
+
+        {{else}}
+
+            <div class="w3-card-4 w3-white w3-center w3-margin-bottom" style="margin:0 -16px">
+                <header class="w3-container w3-dark-grey">
+                    <h2>No devices connected</h2>
+                </header>
+            </div>
+
+        {{/each}}
         </div>
-      </div>
-    {{else}}
-      <div class="small-12 columns">
-        <div class="row">
-          <div class="small-12 columns">
-            <h2>No devices connected</h2>
-          </div>
-        </div>
-      </div>
-    {{/each}}
+
     </div>
 
+    <div class="w3-content w3-justify w3-text-grey w3-padding-32" id="update">
+        <h2 class="w3-text-light-grey">Update API</h2>
 
-    <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
-    <script type="text/javascript" src="js/socket.io.js"></script>
-    <script type="text/javascript">
-      $(function() {
-        var socket = io();
+        <div class="w3-row-padding w3-card w3-center w3-third">
+            <header class="w3-container w3-dark-grey">
+                <h2>1. Manifest</h2>
+            </header>
+            <div class="w3-container w3-padding-16 w3-white">
+                <button class="w3-button w3-green" id="generate-manifest">Generate</button>
+                {{!-- <p>OR</p>
+                <button class="w3-button w3-green">Upload</button> --}}
+            </div>
+        </div>
 
-        $('#devices').children().each(function(index, element) {
-          var _this = $(this);
-          _this.find('.subscribe-presses').change(function() {
-            if ($(this).is(":checked")) {
-              _this.find('.get-presses').prop('disabled', true);
-              socket.emit('subscribe-to-presses', {
-                device: _this.attr('id')
-              });
-            } else {
-              _this.find('.get-presses').prop('disabled', false);
-              socket.emit('unsubscribe-to-presses', {
-                device: _this.attr('id')
-              });
-            }
+        <div class="w3-row-padding w3-card w3-center w3-third">
+            <header class="w3-container w3-dark-grey">
+                <h2>2. Image</h2>
+            </header>
+            <div class="w3-container w3-padding-16 w3-white">
+                <input accept=".bin" type="file" id="image_file_selector"><p></p>
+                <button class="w3-button w3-green" id="upload-image">Upload</button>
+            </div>
+        </div>
+
+        <div class="w3-row-padding w3-card w3-center w3-third">
+            <header class="w3-container w3-dark-grey">
+                <h2>3. Campaign</h2>
+            </header>
+            <div class="w3-container w3-padding-16 w3-white">
+                <button class="w3-button w3-green" id="start-campaign">Start</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="js/socket.io.js"></script>
+<script type="text/javascript" src="js/delivery.js"></script>
+<script type="text/javascript">
+  $(function() {
+    var socket = io();
+    $('#update').hide();
+    $('#provision').hide();
+    $('#provision_nav').hide();
+    $('#connect_nav').click(function() {
+        $('#connect').show();
+        $('#update').hide();
+    });
+    $('#update_nav').click(function() {
+        $('#connect').hide();
+        $('#update').show();
+    });
+
+    $('#devices').children().each(function(index, element) {
+      var _this = $(this);
+      _this.find('.subscribe-presses').change(function() {
+        if ($(this).is(":checked")) {
+          _this.find('.get-presses').prop('disabled', true);
+          socket.emit('subscribe-to-presses', {
+            device: _this.attr('id')
           });
-
-          _this.find('.get-presses').on('click', function() {
-            socket.emit('get-presses', {
-              device: _this.attr('id')
-            });
+        } else {
+          _this.find('.get-presses').prop('disabled', false);
+          socket.emit('unsubscribe-to-presses', {
+            device: _this.attr('id')
           });
+        }
+      });
 
-          _this.find('.blink-pattern').bind('input', function() {
-            _this.find('.update-blink-pattern').addClass('active');
-          })
-
-          _this.find('.update-blink-pattern').on('click', function() {
-            socket.emit('update-blink-pattern', {
-              device: _this.attr('id'),
-              blinkPattern: _this.find('.blink-pattern').val()
-            });
-
-            $(this).removeClass('active');
-          });
-
-          _this.find('.blink').on('click', function() {
-            socket.emit('blink', {
-              device: _this.attr('id')
-            });
-          });
-        });
-
-
-        socket.on('presses', function (data) {
-          console.log('presses', data);
-          $('#' + data.device + ' .presses-value').html(data.value);
-        });
-
-        socket.on('subscribed-to-presses', function (data) {
-          console.log('subscribed-to-presses', data);
-        });
-
-        socket.on('unsubscribed-to-presses', function (data) {
-          console.log('unsubscribed-to-presses', data);
+      _this.find('.get-presses').on('click', function() {
+        socket.emit('get-presses', {
+          device: _this.attr('id')
         });
       });
-    </script>
-  </body>
+
+      _this.find('.blink-pattern').bind('input', function() {
+        _this.find('.update-blink-pattern').addClass('active');
+      })
+
+      _this.find('.update-blink-pattern').on('click', function() {
+        socket.emit('update-blink-pattern', {
+          device: _this.attr('id'),
+          blinkPattern: _this.find('.blink-pattern').val()
+        });
+
+        $(this).removeClass('active');
+      });
+
+      _this.find('.blink').on('click', function() {
+        socket.emit('blink', {
+          device: _this.attr('id')
+        });
+      });
+    });
+
+    $('#generate-manifest').click(function() {
+        socket.emit('generate-manifest', {});
+    });
+
+    $('start-campaign').click(function() {
+        socket.emit('start-campaign', {});
+    });
+
+    socket.on('connect', function() {
+        var delivery = new Delivery(socket);
+
+        delivery.on('delivery.connect', function(delivery) {
+            $("#upload-image").click(function (evt) {
+                var file = document.getElementById('image_file_selector').files[0];
+                delivery.send(file, {});
+                evt.preventDefault();
+            });
+        });
+    });
+
+    socket.on('generated-manifest', function (data) {
+        var file_path='/update_default_resources.c';
+        var a = document.createElement('A');
+        a.href = file_path;
+        a.download = file_path.substr(file_path.lastIndexOf('/') + 1);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    socket.on('presses', function (data) {
+      console.log('presses', data);
+      $('#' + data.device + ' .presses-value').html(data.value);
+    });
+
+    socket.on('subscribed-to-presses', function (data) {
+      console.log('subscribed-to-presses', data);
+    });
+
+    socket.on('unsubscribed-to-presses', function (data) {
+      console.log('unsubscribed-to-presses', data);
+    });
+  });
+</script>
+
+</body>
 </html>

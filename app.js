@@ -8,18 +8,30 @@ var http = require('http');
 var path = require('path');
 var express = require('express');
 var mbed = require("mbed-cloud-sdk");
+var exec = require('child_process').exec;
+var fs = require('fs');
+var dl = require('delivery');
 
 // CONFIG (change these)
 var accessKey = process.env.ACCESS_KEY || "ChangeMe";
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 8081;
 
 // Paths to resources on the devices
 var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
 var buttonResourceURI = '/3200/0/5501';
 
+var image_url = '<undefined>';
+var manifest_url = '<undefined>';
+var campaign_url = '<undefined>';
+
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
+    apiKey: accessKey
+});
+
+// Instantiate an mbed Cloud device API object
+var updateApi = new mbed.UpdateApi({
     apiKey: accessKey
 });
 
@@ -140,8 +152,85 @@ io.on('connection', function (socket) {
     if (index >= 0) {
       sockets.splice(index, 1);
     }
-  })
+  });
+
+  socket.on('generate-manifest', function(data) {
+    exec('manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error, stdout, stderr) {
+      if (!error) {
+        exec('mv update_default_resources.c public/.', function(error, stdout, stderr) {
+          if (!error) {
+            socket.emit('generated-manifest', {});
+          }
+        });
+      }
+    });
+  });
+
+  var delivery = dl.listen(socket);
+  delivery.on('receive.success',function(file) {
+    fs.writeFile(file.name,file.buffer, function(err) {
+      if(err) {
+        return console.log('File could not be saved.');
+      } else {
+        updateApi.addFirmwareImage({
+          name: "quickstart_image",
+          dataFile: fs.createReadStream(file.name)
+        }, function(error, image) {
+          if (error) {
+            return console.log(error);
+          }
+          image_url = image.url;
+          createManifest(image_url, file.name);
+        });
+      };
+    });
+
+  });
+
+  socket.on('start-campaign', function(data) {
+    update.addCampaign({
+      name: 'quickstart_campaign',
+      deviceFilter: {
+        state: { $eq: "registered" },
+        createdAt: { $gte: new Date("01-01-2017"), $lte: new Date("01-01-2020") },
+        updatedAt: { $gte: new Date("01-01-2017"), $lte: new Date("01-01-2020") },
+        customAttributes: {
+          device_type: { $eq: "quickstart" }
+        }
+      }
+    }, function(error, campaign) {
+      if (error) {
+        return console.log(error);
+      }
+      campaign_url = campaign.url;
+      update.startCampaign(campaign_url, function(error, data) {
+        if (error) {
+          return console.log(error);
+        }
+        console.log(data);
+      });
+    });
+  });
+
 });
+
+function createManifest(deviceURL, file) {
+  var tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
+  var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + file + ' -o quickstart.manifest < ' + tty;
+  exec(cmd, function(error, stdout, stderr) {
+    if (!error) {
+      updateApi.addFirmwareManifest({
+        name: "quickstart_manifest",
+        dataFile: fs.createReadStream('quickstart.manifest')
+      }, function(error, manifest) {
+          if (error) {
+            return console.log(error);
+          }
+        manifest_url = manifest.url;
+      });
+    }
+  });
+}
 
 // Start the app
 server.listen(port, function() {
@@ -152,4 +241,5 @@ server.listen(port, function() {
       console.log('mbed Cloud Quickstart listening at http://localhost:%s', port);
     }
   });
+  createManifest('http://firmware-catalog-media-ca57.s3.amazonaws.com/mbed-cloud-client-example-sources-internal_1ZqZvbN.bin', 'mbed-cloud-client-example-sources-internal.bin')
 });
