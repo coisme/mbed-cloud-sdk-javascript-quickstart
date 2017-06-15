@@ -21,9 +21,9 @@ var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
 var buttonResourceURI = '/3200/0/5501';
 
+var image_name = '<undefined>';
 var image_url = '<undefined>';
-var manifest_url = '<undefined>';
-var campaign_url = '<undefined>';
+var manifest_id = '<undefined>';
 
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
@@ -32,6 +32,11 @@ var connectApi = new mbed.ConnectApi({
 
 // Instantiate an mbed Cloud device API object
 var updateApi = new mbed.UpdateApi({
+    apiKey: accessKey
+});
+
+// Instantiate an mbed Cloud device API object
+var deviceApi = new mbed.DeviceDirectoryApi({
     apiKey: accessKey
 });
 
@@ -49,9 +54,18 @@ app.get('/', function (req, res) {
       // Setup the function array
       var functionArray = devices.map(function(device) {
         return function(mapCallback) {
-          connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
-            mapCallback(error);
-            device.blinkPattern = value;
+          deviceApi.updateDevice({
+            id: device.id,
+            description: 'Quickstart device',
+            customAttributes: {
+              device_type: 'quickstart'
+            }
+          }, function(error, device) {
+              if (error) throw error;
+              connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
+                mapCallback(error);
+                device.blinkPattern = value;
+              });
           });
         };
       });
@@ -154,6 +168,9 @@ io.on('connection', function (socket) {
     }
   });
 
+  /*
+   * Generate manifest security files
+  */
   socket.on('generate-manifest', function(data) {
     exec('rm -rf .update-certificates/; manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error, stdout, stderr) {
       if (!error) {
@@ -166,22 +183,29 @@ io.on('connection', function (socket) {
     });
   });
 
+  /*
+   * File uploaded
+  */
   var delivery = dl.listen(socket);
   delivery.on('receive.success',function(file) {
     var params = file.params;
+    image_name = file.name.substring(0, file.name.length - 4);
     if (params.name == 'image')
       uploadImage(file);
     else if (params.name == 'manifest')
       uploadManifest(file);
   });
 
+  /*
+   * Image uploaded via 'Upload' button
+  */
   function uploadImage(file) {
     fs.writeFile(file.name,file.buffer, function(err) {
       if(err) {
         return console.log('File could not be saved.');
       } else {
         updateApi.addFirmwareImage({
-          name: "quickstart_image",
+          name: image_name,
           dataFile: fs.createReadStream(file.name)
         }, function(error, image) {
           if (error) {
@@ -194,40 +218,52 @@ io.on('connection', function (socket) {
     });
   }
 
-  function createManifest(deviceURL, file) {
+  /*
+   * Create manifest file after receiving the image url
+  */
+  function createManifest(deviceURL, fileName) {
     var tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
-    var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + file + ' -o quickstart.manifest < ' + tty;
+    var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + fileName + ' -o quickstart.manifest < ' + tty;
     exec(cmd, function(error, stdout, stderr) {
       if (!error) {
         updateApi.addFirmwareManifest({
-          name: "quickstart_manifest",
+          name: image_name,
           dataFile: fs.createReadStream('quickstart.manifest')
         }, function(error, manifest) {
             if (error) {
               return console.log(error);
             }
-          manifest_url = manifest.url;
+          manifest_id = manifest.id;
         });
       }
     });
   }
 
+  /*
+   * Upload manifest.json file to create necessary manifest security files
+  */
   function uploadManifest(file) {
     fs.writeFile(file.name,file.buffer, function(err) {
       if(err) {
         return console.log('File could not be saved.');
       } else {
         var jsonData = JSON.parse(file.buffer.toString('utf8'));
+        if (!fs.existsSync('.update-certificates')) {
+          fs.mkdirSync('.update-certificates');
+        }
         fs.writeFile('.manifest_tool.json', JSON.stringify(jsonData.json));
         fs.writeFile('.update-certificates/default.key.pem', jsonData.pem);
-        fs.writeFile('.update-certificates/default.der', new Buffer(jsonData.der, 'base64').toString());
+        fs.writeFile('.update-certificates/default.der', new Buffer(jsonData.der, 'base64'));
       };
     });
   }
 
+  /*
+   * Start campaign
+  */
   socket.on('start-campaign', function(data) {
-    update.addCampaign({
-      name: 'quickstart_campaign',
+    updateApi.addCampaign({
+      name: image_name,
       deviceFilter: {
         state: { $eq: "registered" },
         createdAt: { $gte: new Date("01-01-2017"), $lte: new Date("01-01-2020") },
@@ -235,17 +271,13 @@ io.on('connection', function (socket) {
         customAttributes: {
           device_type: { $eq: "quickstart" }
         }
-      }
+      },
+      manifestId: manifest_id
     }, function(error, campaign) {
-      if (error) {
-        return console.log(error);
-      }
-      campaign_url = campaign.url;
-      update.startCampaign(campaign_url, function(error, data) {
-        if (error) {
-          return console.log(error);
-        }
-        console.log(data);
+      if (error) return console.log(error);
+      updateApi.startCampaign(campaign.id, function(error, data) {
+        if (error) return console.log(error);
+        console.log('Starting update');
       });
     });
   });
