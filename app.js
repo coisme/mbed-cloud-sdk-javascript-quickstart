@@ -106,8 +106,8 @@ io.on('connection', function (socket) {
       socket.emit('subscribed-to-presses', {
         device: data.device
       });
-    }, function(payload) { 
-      buttonPressed(data.device, payload); 
+    }, function(payload) {
+      buttonPressed(data.device, payload);
     });
   });
 
@@ -155,7 +155,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('generate-manifest', function(data) {
-    exec('manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error, stdout, stderr) {
+    exec('rm -rf .update-certificates/; manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error, stdout, stderr) {
       if (!error) {
         exec('mv update_default_resources.c public/.', function(error, stdout, stderr) {
           if (!error) {
@@ -168,6 +168,14 @@ io.on('connection', function (socket) {
 
   var delivery = dl.listen(socket);
   delivery.on('receive.success',function(file) {
+    var params = file.params;
+    if (params.name == 'image')
+      uploadImage(file);
+    else if (params.name == 'manifest')
+      uploadManifest(file);
+  });
+
+  function uploadImage(file) {
     fs.writeFile(file.name,file.buffer, function(err) {
       if(err) {
         return console.log('File could not be saved.');
@@ -184,8 +192,38 @@ io.on('connection', function (socket) {
         });
       };
     });
+  }
 
-  });
+  function createManifest(deviceURL, file) {
+    var tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
+    var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + file + ' -o quickstart.manifest < ' + tty;
+    exec(cmd, function(error, stdout, stderr) {
+      if (!error) {
+        updateApi.addFirmwareManifest({
+          name: "quickstart_manifest",
+          dataFile: fs.createReadStream('quickstart.manifest')
+        }, function(error, manifest) {
+            if (error) {
+              return console.log(error);
+            }
+          manifest_url = manifest.url;
+        });
+      }
+    });
+  }
+
+  function uploadManifest(file) {
+    fs.writeFile(file.name,file.buffer, function(err) {
+      if(err) {
+        return console.log('File could not be saved.');
+      } else {
+        var jsonData = JSON.parse(file.buffer.toString('utf8'));
+        fs.writeFile('.manifest_tool.json', JSON.stringify(jsonData.json));
+        fs.writeFile('.update-certificates/default.key.pem', jsonData.pem);
+        fs.writeFile('.update-certificates/default.der', new Buffer(jsonData.der, 'base64').toString());
+      };
+    });
+  }
 
   socket.on('start-campaign', function(data) {
     update.addCampaign({
@@ -214,24 +252,6 @@ io.on('connection', function (socket) {
 
 });
 
-function createManifest(deviceURL, file) {
-  var tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
-  var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + file + ' -o quickstart.manifest < ' + tty;
-  exec(cmd, function(error, stdout, stderr) {
-    if (!error) {
-      updateApi.addFirmwareManifest({
-        name: "quickstart_manifest",
-        dataFile: fs.createReadStream('quickstart.manifest')
-      }, function(error, manifest) {
-          if (error) {
-            return console.log(error);
-          }
-        manifest_url = manifest.url;
-      });
-    }
-  });
-}
-
 // Start the app
 server.listen(port, function() {
   // Set up the notification channel (pull notifications)
@@ -241,5 +261,4 @@ server.listen(port, function() {
       console.log('mbed Cloud Quickstart listening at http://localhost:%s', port);
     }
   });
-  createManifest('http://firmware-catalog-media-ca57.s3.amazonaws.com/mbed-cloud-client-example-sources-internal_1ZqZvbN.bin', 'mbed-cloud-client-example-sources-internal.bin')
 });

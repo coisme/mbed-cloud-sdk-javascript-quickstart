@@ -115,8 +115,9 @@ body, h1,h2,h3,h4,h5,h6 {
             </header>
             <div class="w3-container w3-padding-16 w3-white">
                 <button class="w3-button w3-green" id="generate-manifest">Generate</button>
-                {{!-- <p>OR</p>
-                <button class="w3-button w3-green">Upload</button> --}}
+                <p>OR</p>
+                <input accept=".json" type="file" id="manifest_file_selector"><p></p>
+                <button class="w3-button w3-green" id="upload-manifest">Upload</button>
             </div>
         </div>
 
@@ -202,36 +203,6 @@ body, h1,h2,h3,h4,h5,h6 {
       });
     });
 
-    $('#generate-manifest').click(function() {
-        socket.emit('generate-manifest', {});
-    });
-
-    $('start-campaign').click(function() {
-        socket.emit('start-campaign', {});
-    });
-
-    socket.on('connect', function() {
-        var delivery = new Delivery(socket);
-
-        delivery.on('delivery.connect', function(delivery) {
-            $("#upload-image").click(function (evt) {
-                var file = document.getElementById('image_file_selector').files[0];
-                delivery.send(file, {});
-                evt.preventDefault();
-            });
-        });
-    });
-
-    socket.on('generated-manifest', function (data) {
-        var file_path='/update_default_resources.c';
-        var a = document.createElement('A');
-        a.href = file_path;
-        a.download = file_path.substr(file_path.lastIndexOf('/') + 1);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    });
-
     socket.on('presses', function (data) {
       console.log('presses', data);
       $('#' + data.device + ' .presses-value').html(data.value);
@@ -244,6 +215,53 @@ body, h1,h2,h3,h4,h5,h6 {
     socket.on('unsubscribed-to-presses', function (data) {
       console.log('unsubscribed-to-presses', data);
     });
+
+    $('#generate-manifest').click(function() {
+        socket.emit('generate-manifest', {});
+    });
+
+    /*
+    * Stage 1: Manifest
+    */
+    socket.on('generated-manifest', function (data) {
+        var file_path='/update_default_resources.c';
+        var a = document.createElement('A');
+        a.href = file_path;
+        a.download = file_path.substr(file_path.lastIndexOf('/') + 1);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    /*
+    * Stage 2: Image
+    */
+    socket.on('connect', function() {
+        var delivery = new Delivery(socket);
+
+        delivery.on('delivery.connect', function(delivery) {
+
+            $("#upload-image").click(function (evt) {
+                var file = document.getElementById('image_file_selector').files[0];
+                delivery.send(file, {name: 'image'});
+                evt.preventDefault();
+            });
+
+            $("#upload-manifest").click(function (evt) {
+                var file = document.getElementById('manifest_file_selector').files[0];
+                delivery.send(file, {name: 'manifest'});
+                evt.preventDefault();
+            });
+        });
+    });
+
+    /*
+    * Stage 3: Campaign
+    */
+    $('start-campaign').click(function() {
+        socket.emit('start-campaign', {});
+    });
+
   });
 </script>
 
