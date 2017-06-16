@@ -173,44 +173,75 @@ io.on('connection', function (socket) {
   */
   socket.on('generate-manifest', function(data) {
     exec('rm -rf .update-certificates/; manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error, stdout, stderr) {
-      if (!error) {
-        exec('mv update_default_resources.c public/.', function(error, stdout, stderr) {
-          if (!error) {
-            socket.emit('generated-manifest', {});
-          }
-        });
+
+      // Error reporting
+      if (error) {
+        socket.emit('console-log', 'Error initializing manifest-tool<br>' + error + '<br>');
+        return console.log(error);
       }
+
+      // Move the credential file to the public folder so a user has access to download it
+      socket.emit('console-log', 'manifest-tool executed<br>');
+      exec('mv update_default_resources.c public/.', function(error, stdout, stderr) {
+
+        // Error reporting
+        if (error) {
+          socket.emit('console-log', 'Error generating update_default_resources.c<br>' + error + '<br>');
+          return console.log(error);
+        }
+
+        // Send the front webserver the command to download the credential file to the user
+        socket.emit('console-log', 'manifest-tool generated update_default_resources.c file and downloaded to user<br>');
+        socket.emit('generated-manifest', {});
+      });
+
     });
   });
 
-  /*
-   * File uploaded
-  */
+  /**
+  * File uploaded
+  **/
   var delivery = dl.listen(socket);
   delivery.on('receive.success',function(file) {
     var params = file.params;
     image_name = file.name.substring(0, file.name.length - 4);
+    socket.emit('console-log', 'Server received file with file name: ' + file.name + '<br>');
     if (params.name == 'image')
       uploadImage(file);
     else if (params.name == 'manifest')
       uploadManifest(file);
   });
 
-  /*
-   * Image uploaded via 'Upload' button
-  */
+  /**
+  * Image uploaded via 'Upload' button
+  * @param file Firmware binary to upload to mbed cloud
+  **/
   function uploadImage(file) {
-    fs.writeFile(file.name,file.buffer, function(err) {
-      if(err) {
-        return console.log('File could not be saved.');
+
+    // Save the uploaded image on the server
+    fs.writeFile(file.name,file.buffer, function(error) {
+
+      // Error reporting
+      if(error) {
+        socket.emit('console-log', 'Error saving image binary to disk. ' + error + '<br>');
+        return console.log(error);
       } else {
+        socket.emit('console-log', 'Server saved image binary to disk<br>');
+
+        // Use mbed SDK to upload the firmware image
         updateApi.addFirmwareImage({
           name: image_name,
           dataFile: fs.createReadStream(file.name)
         }, function(error, image) {
+
+          // Error reporting
           if (error) {
+            socket.emit('console-log', 'Error uploading image to mbed Cloud. ' + error + '<br>');
             return console.log(error);
           }
+
+          // Use the image URL returned to create a manifest file
+          socket.emit('console-log', 'Image uploaded to mbed Cloud. URL: ' + image.url + '<br>');
           image_url = image.url;
           createManifest(image_url, file.name);
         });
@@ -218,35 +249,58 @@ io.on('connection', function (socket) {
     });
   }
 
-  /*
-   * Create manifest file after receiving the image url
-  */
+  /**
+  * Create manifest file after receiving the image url
+  * @param deviceURL URL returned by the mbed SDK where the firmware binary was uploaded to
+  * @param fileName local file instance that was uploaded
+  **/
   function createManifest(deviceURL, fileName) {
+
+    // Run the manifest-tool locally and create a manifest file
     var tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
     var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + fileName + ' -o quickstart.manifest < ' + tty;
     exec(cmd, function(error, stdout, stderr) {
-      if (!error) {
-        updateApi.addFirmwareManifest({
-          name: image_name,
-          dataFile: fs.createReadStream('quickstart.manifest')
-        }, function(error, manifest) {
-            if (error) {
-              return console.log(error);
-            }
-          manifest_id = manifest.id;
-        });
+
+      // Error reporting
+      if (error) {
+        socket.emit('console-log', 'Error creating a manifest file. ' + error + '<br>');
+        return console.log(error);
       }
+
+      socket.emit('console-log', 'Manifest file created and saved to disk<br>');
+      // Upload the manifest file to mbed Cloud
+      updateApi.addFirmwareManifest({
+        name: image_name,
+        dataFile: fs.createReadStream('quickstart.manifest')
+      }, function(error, manifest) {
+
+        // Error reporting
+        if (error) {
+          socket.emit('console-log', 'Error uploading manifest to mbed Cloud. ' + error + '<br>');
+          return console.log(error);
+        }
+
+        // Save manifest ID for starting a campaign
+        socket.emit('console-log', 'Manifest uploaded to mbed Cloud. URL: ' + manifest.url + '<br>');
+        manifest_id = manifest.id;
+      });
     });
   }
 
-  /*
-   * Upload manifest.json file to create necessary manifest security files
-  */
+  /**
+  * Upload manifest.json file to create necessary manifest security files
+  * @param file Manifest json file which has the contents of the 3 security files needed
+  **/
   function uploadManifest(file) {
-    fs.writeFile(file.name,file.buffer, function(err) {
-      if(err) {
-        return console.log('File could not be saved.');
+    fs.writeFile(file.name,file.buffer, function(error) {
+
+      // Error reporting
+      if(error) {
+        socket.emit('console-log', 'Error saving manifest JSON file to disk. ' + error + '<br>');
+        return console.log(error);
       } else {
+
+        // Parse json structure for pem, der, and json file contents
         var jsonData = JSON.parse(file.buffer.toString('utf8'));
         if (!fs.existsSync('.update-certificates')) {
           fs.mkdirSync('.update-certificates');
@@ -254,14 +308,17 @@ io.on('connection', function (socket) {
         fs.writeFile('.manifest_tool.json', JSON.stringify(jsonData.json));
         fs.writeFile('.update-certificates/default.key.pem', jsonData.pem);
         fs.writeFile('.update-certificates/default.der', new Buffer(jsonData.der, 'base64'));
+        socket.emit('console-log', 'Saved PEM, DER and JSON file data to disk<br>');
       };
     });
   }
 
-  /*
-   * Start campaign
-  */
+  /**
+  * Start campaign
+  **/
   socket.on('start-campaign', function(data) {
+
+    // Add a campaign via the mbed Cloud SDK
     updateApi.addCampaign({
       name: image_name,
       deviceFilter: {
@@ -274,10 +331,24 @@ io.on('connection', function (socket) {
       },
       manifestId: manifest_id
     }, function(error, campaign) {
-      if (error) return console.log(error);
+
+      // Error reporting
+      if (error) {
+        socket.emit('console-log', 'Error adding a campaign to mbed Cloud. ' + error + '<br>');
+        return console.log(error);
+      }
+      socket.emit('console-log', 'Campaign added to mbed Cloud. ID: ' + campaign.id + '<br>');
+
+      // Start the previously added campaign
       updateApi.startCampaign(campaign.id, function(error, data) {
-        if (error) return console.log(error);
-        console.log('Starting update');
+
+        // Error reporting
+        if (error) {
+          socket.emit('console-log', 'Error starting campaign. ' + error + '<br>');
+          return console.log(error);
+        }
+
+        socket.emit('console-log', 'Campaign started. Started at ' + campaign.startedAt + '<br>');
       });
     });
   });
