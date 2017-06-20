@@ -59,18 +59,9 @@ app.get('/', function (req, res) {
       // Setup the function array
       var functionArray = devices.map(function(device) {
         return function(mapCallback) {
-          deviceApi.updateDevice({
-            id: device.id,
-            description: 'Quickstart device',
-            customAttributes: {
-              device_type: 'quickstart'
-            }
-          }, function(error, device) {
-              if (error) throw error;
-              connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
-                mapCallback(error);
-                device.blinkPattern = value;
-              });
+          connectApi.getResourceValue(device.id, blinkPatternResourceURI, function(error, value) {
+            mapCallback(error);
+            device.blinkPattern = value;
           });
         };
       });
