@@ -11,6 +11,7 @@ var mbed = require("mbed-cloud-sdk");
 var exec = require('child_process').exec;
 var fs = require('fs');
 var dl = require('delivery');
+var uuid = require('uuid/v5');
 
 // CONFIG (change these)
 var accessKey = process.env.ACCESS_KEY || "ChangeMe";
@@ -24,6 +25,10 @@ var buttonResourceURI = '/3200/0/5501';
 var image_name = '<undefined>';
 var image_url = '<undefined>';
 var manifest_id = '<undefined>';
+
+// Information for the manifest
+var vendor = 'mbed-quickstart-company';
+var model = 'FRDM-K64F';
 
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
@@ -172,7 +177,7 @@ io.on('connection', function (socket) {
    * Generate manifest security files
   */
   socket.on('generate-manifest', function(data) {
-    exec('rm -rf .update-certificates/; manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error, stdout, stderr) {
+    exec('rm -rf .update-certificates/; manifest-tool init -d "' + vendor + '" -m "' + model + '" -q --force', function(error, stdout, stderr) {
 
       // Error reporting
       if (error) {
@@ -257,7 +262,8 @@ io.on('connection', function (socket) {
   function createManifest(deviceURL, fileName) {
 
     // Run the manifest-tool locally and create a manifest file
-    var tty = process.platform === 'win32' ? 'CON' : '/dev/tty';
+    // Manifest tool requires a terminal instance
+    var tty = process.platform === 'win32' ? 'CON' : '/dev/pts/0';
     var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + fileName + ' -o quickstart.manifest < ' + tty;
     exec(cmd, function(error, stdout, stderr) {
 
@@ -325,9 +331,7 @@ io.on('connection', function (socket) {
         state: { $eq: "registered" },
         createdAt: { $gte: new Date("01-01-2017"), $lte: new Date("01-01-2020") },
         updatedAt: { $gte: new Date("01-01-2017"), $lte: new Date("01-01-2020") },
-        customAttributes: {
-          device_type: { $eq: "quickstart" }
-        }
+        deviceClass: uuid(model, uuid(vendor, uuid.DNS)).replace(new RegExp('-', 'g'), '')
       },
       manifestId: manifest_id
     }, function(error, campaign) {
