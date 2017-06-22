@@ -11,7 +11,6 @@ var mbed = require("mbed-cloud-sdk");
 var exec = require('child_process').exec;
 var fs = require('fs');
 var dl = require('delivery');
-var uuid = require('uuid/v5');
 
 // CONFIG (change these)
 var accessKey = process.env.ACCESS_KEY || "ChangeMe";
@@ -26,23 +25,22 @@ var image_name = '<undefined>';
 var image_url = '<undefined>';
 var manifest_id = '<undefined>';
 
-// Information for the manifest
-var vendor = 'mbed-quickstart-company';
-var model = 'FRDM-K64F';
-
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
-    apiKey: accessKey
+    apiKey: accessKey,
+    host: 'https://api.us-east-1.mbedcloud.com'
 });
 
 // Instantiate an mbed Cloud device API object
 var updateApi = new mbed.UpdateApi({
-    apiKey: accessKey
+    apiKey: accessKey,
+    host: 'https://api.us-east-1.mbedcloud.com'
 });
 
 // Instantiate an mbed Cloud device API object
 var deviceApi = new mbed.DeviceDirectoryApi({
-    apiKey: accessKey
+    apiKey: accessKey,
+    host: 'https://api.us-east-1.mbedcloud.com'
 });
 
 // Create the express app
@@ -168,7 +166,7 @@ io.on('connection', function (socket) {
    * Generate manifest security files
   */
   socket.on('generate-manifest', function(data) {
-    exec('rm -rf .update-certificates/; manifest-tool init -d "' + vendor + '" -m "' + model + '" -q --force', function(error, stdout, stderr) {
+    exec('rm -rf .update-certificates/; manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error, stdout, stderr) {
 
       // Error reporting
       if (error) {
@@ -314,6 +312,12 @@ io.on('connection', function (socket) {
   * Start campaign
   **/
   socket.on('start-campaign', function(data) {
+    // Way to generate deviceClass automatically: 
+    // uuid(model, uuid(vendor, uuid.DNS)).replace(new RegExp('-', 'g'), '')
+
+    // Instead, read the classId object from the manifest json file
+    var classId = JSON.parse(fs.readFileSync('.manifest_tool.json', 'utf8'))['classId'];
+    classId = classId.replace(new RegExp('-', g), '');
 
     // Add a campaign via the mbed Cloud SDK
     updateApi.addCampaign({
@@ -322,7 +326,7 @@ io.on('connection', function (socket) {
         state: { $eq: "registered" },
         createdAt: { $gte: new Date("01-01-2017"), $lte: new Date("01-01-2020") },
         updatedAt: { $gte: new Date("01-01-2017"), $lte: new Date("01-01-2020") },
-        deviceClass: uuid(model, uuid(vendor, uuid.DNS)).replace(new RegExp('-', 'g'), '')
+        deviceClass: classId
       },
       manifestId: manifest_id
     }, function(error, campaign) {
