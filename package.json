@@ -18,14 +18,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mray19027/mbed-cloud-sdk-javascript-quickstart"
+    "url": "https://github.com/armmbed/mbed-cloud-sdk-javascript-quickstart"
   },
   "dependencies": {
     "async": "^1.5.2",
+    "delivery": "^0.0.6",
     "dotenv": "^2.0.0",
     "express": "^4.13.3",
     "hbs": "~3.1.0",
-    "socket.io": "^1.4.5",
-    "mbed-cloud-sdk-javascript": "armmbed/mbed-cloud-sdk-javascript#build"
+    "mbed-cloud-sdk": "github:armmbed/mbed-cloud-sdk-javascript#build",
+    "socket.io": "^1.4.5"
   }
 }

@@ -1,139 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
 
-    <title>mbed Cloud Webapp Quickstart</title>
+<head>
+  <title>mbed Cloud Quickstart</title>
 
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/foundation.min.css">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!--[if lt IE 9]>
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="row margin">
-      <div class="small-12 columns">
-        <div><img src="img/ARMmbedLogo.png" alt="ARM mbed"></div>
-      </div>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/custom.css">
+</head>
+
+<body>
+
+  <!-- Icon Bar (Sidebar - hidden on small screens) -->
+  <div class="w3-sidebar w3-bar-block w3-small w3-light-grey w3-hide-small">
+    <a href="#" class="w3-bar-item w3-button w3-padding-large arm-gray-hover w3-center" id="connect_nav">
+      <i class="fa fa-globe w3-xxlarge"></i>
+      <p>Connect</p>
+    </a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large arm-gray-hover w3-center" id="update_nav">
+      <i class="fa fa-lock w3-xxlarge"></i>
+      <p>Update</p>
+    </a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large arm-gray-hover w3-center" id="provision_nav">
+      <i class="fa fa-handshake-o w3-xxlarge"></i>
+      <p>Provision</p>
+    </a>
+  </div>
+
+  <!-- Navbar on small screens (Hidden on medium and large screens) -->
+  <div class="w3-top w3-hide-large w3-hide-medium w3-light-grey">
+    <div class="w3-bar w3-center w3-small">
+      <a href="#" class="w3-bar-item w3-button arm-blue-hover" id="connect_nav_small">Connect</a>
+      <a href="#" class="w3-bar-item w3-button arm-blue-hover" id="update_nav_small">Update</a>
+      <a href="#" class="w3-bar-item w3-button arm-blue-hover" id="provision_nav_small">Provision</a>
     </div>
-    <div class="blueband">
-      <div class="row">
-        <div class="small-12 columns">
-          <h1>Webapp Quickstart</h1>
-        </div>
-      </div>
-    </div>
-    <div id="devices">
-    {{#each devices}}
-      <div class="row" id="{{id}}">
-        <div class="small-12 columns">
-          <div class="row">
-            <div class="small-12 columns">
-              <h2>{{id}}</h2>
-            </div>
-          </div>
-          <div class="row">
-            <div class="small-12 medium-6 columns">
-              <h4>Presses: <span class="presses-value">Unknown</span></h4>
-              <label><input type="checkbox" class="subscribe-presses"> Subscribe</label>
-              <button class="get-presses">GET</button>
-            </div>
-            <div class="small-12 medium-6 columns">
-              <h4>LED Blink Pattern</h4>
-              <div>
-                <input type="text" value="{{blinkPattern}}" class="blink-pattern">
-              </div>
-              <div class="row">
-                <div class="small-6 columns">
-                  <button class="update-blink-pattern">Update (PUT)</button>
+  </div>
+
+  <!-- Page Content -->
+  <div id="main">
+
+    <!-- Header/Home -->
+    <span class="w3-hide-small">
+      <header class="w3-container arm-blue-no-hover" id="quickstart">
+        <h1>mbed Cloud Quickstart</h1>
+      </header>
+    </span>
+
+    <div class="w3-container">
+      <div class="w3-content w3-justify w3-text-grey w3-padding-32" id="connect">
+        <h2 class="w3-text-dark-grey">Connect API</h2>
+
+        <div id="devices">
+          {{#each devices}}
+
+            <div class="w3-card-4 w3-white w3-center w3-margin-bottom" id="{{id}}">
+              <header class="w3-container arm-gray w3-text-white ">
+                <h2>{{id}}</h2>
+              </header>
+              <div class="w3-container">
+                <div class="w3-container w3-padding-16 w3-half w3-white">
+                  <h4>Presses: <span class="presses-value">Unknown</span></h4>
+                  <div class="w3-bar">
+                    <label><input type="checkbox" class="subscribe-presses w3-check">Subscribe</label>
+                    <button class="get-presses w3-button arm-yellow">GET</button>
+                  </div>
                 </div>
-                <div class="small-6 columns text-right">
-                  <button class="blink">Blink (POST)</button>
+                <div class="w3-container w3-padding-16 w3-half w3-white">
+                  <h4>LED Blink Pattern</h4>
+                  <div class="w3-bar">
+                    <input type="text" value="{{blinkPattern}}" class="blink-pattern w3-left w3-input w3-border w3-half">
+                    <button class="update-blink-pattern w3-button arm-blue w3-quarter">Update (PUT)</button>
+                    <button class="blink w3-button arm-green w3-quarter">Blink (POST)</button>
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            {{else}}
+
+              <div class="w3-card-4 w3-white w3-center w3-margin-bottom" style="margin:0 -16px">
+                <header class="w3-container arm-gray w3-text-white">
+                  <h2>No devices connected</h2>
+                </header>
+              </div>
+
+          {{/each}}
+        </div>
+
+      </div>
+    </div>
+
+    <div class="w3-container">
+
+      <div class="w3-content w3-justify w3-text-grey w3-padding-32" id="update">
+        <h2 class="w3-text-dark-grey">Update API</h2>
+
+        <div class="w3-row-padding w3-center" style="margin:0 -16px;">
+          <div class="w3-third">
+            <div class="w3-card w3-margin-bottom">
+              <header class="w3-container arm-gray w3-text-white">
+                <h2>1. Manifest</h2>
+              </header>
+              <div class="w3-container w3-padding-large custom-card">
+                <button class="w3-button arm-blue" id="generate-manifest">Generate</button>
+                <p>OR</p>
+                <input accept=".json" type="file" id="manifest_file_selector">
+                <p></p>
+                <button class="w3-button arm-blue" id="upload-manifest">Upload</button>
+              </div>
+            </div>
+          </div>
+          <div class="w3-third">
+            <div class="w3-card w3-margin-bottom">
+              <header class="w3-container arm-gray w3-text-white">
+                <h2>2. Image</h2>
+              </header>
+              <div class="w3-container w3-padding-large custom-card">
+                <input accept=".bin" type="file" id="image_file_selector">
+                <p></p>
+                <button class="w3-button arm-blue" id="upload-image">Upload</button>
+              </div>
+            </div>
+          </div>
+          <div class="w3-third">
+            <div class="w3-card w3-margin-bottom">
+              <header class="w3-container arm-gray w3-text-white">
+                <h2>3. Campaign</h2>
+              </header>
+              <div class="w3-container w3-padding-large custom-card">
+                <button class="w3-button arm-green" id="start-campaign">Start</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    {{else}}
-      <div class="small-12 columns">
-        <div class="row">
-          <div class="small-12 columns">
-            <h2>No devices connected</h2>
+
+        <div class="w3-card">
+          <header class="w3-container arm-gray w3-text-white w3-center">
+            <h2>Console log</h2>
+          </header>
+          <div id="console-log" class="w3-container w3-padding-16 w3-white scroll">
           </div>
         </div>
       </div>
-    {{/each}}
     </div>
+  </div>
 
+  <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="js/socket.io.js"></script>
+  <script type="text/javascript" src="js/delivery.js"></script>
+  <script type="text/javascript" src="js/custom.js"></script>
 
-    <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
-    <script type="text/javascript" src="js/socket.io.js"></script>
-    <script type="text/javascript">
-      $(function() {
-        var socket = io();
+</body>
 
-        $('#devices').children().each(function(index, element) {
-          var _this = $(this);
-          _this.find('.subscribe-presses').change(function() {
-            if ($(this).is(":checked")) {
-              _this.find('.get-presses').prop('disabled', true);
-              socket.emit('subscribe-to-presses', {
-                device: _this.attr('id')
-              });
-            } else {
-              _this.find('.get-presses').prop('disabled', false);
-              socket.emit('unsubscribe-to-presses', {
-                device: _this.attr('id')
-              });
-            }
-          });
-
-          _this.find('.get-presses').on('click', function() {
-            socket.emit('get-presses', {
-              device: _this.attr('id')
-            });
-          });
-
-          _this.find('.blink-pattern').bind('input', function() {
-            _this.find('.update-blink-pattern').addClass('active');
-          })
-
-          _this.find('.update-blink-pattern').on('click', function() {
-            socket.emit('update-blink-pattern', {
-              device: _this.attr('id'),
-              blinkPattern: _this.find('.blink-pattern').val()
-            });
-
-            $(this).removeClass('active');
-          });
-
-          _this.find('.blink').on('click', function() {
-            socket.emit('blink', {
-              device: _this.attr('id')
-            });
-          });
-        });
-
-
-        socket.on('presses', function (data) {
-          console.log('presses', data);
-          $('#' + data.device + ' .presses-value').html(data.value);
-        });
-
-        socket.on('subscribed-to-presses', function (data) {
-          console.log('subscribed-to-presses', data);
-        });
-
-        socket.on('unsubscribed-to-presses', function (data) {
-          console.log('unsubscribed-to-presses', data);
-        });
-      });
-    </script>
-  </body>
 </html>
