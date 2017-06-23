@@ -250,11 +250,7 @@ io.on('connection', function (socket) {
   * @param fileName local file instance that was uploaded
   **/
   function createManifest(deviceURL, fileName) {
-
-    // Run the manifest-tool locally and create a manifest file
-    // Manifest tool requires a terminal instance
-    var tty = process.platform === 'win32' ? 'CON' : '/dev/pts/0';
-    var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + fileName + ' -o quickstart.manifest < ' + tty;
+    var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + fileName + ' -o quickstart.manifest';
     exec(cmd, function(error, stdout, stderr) {
 
       // Error reporting
@@ -318,7 +314,7 @@ io.on('connection', function (socket) {
 
     // Instead, read the classId object from the manifest json file
     var classId = JSON.parse(fs.readFileSync('.manifest_tool.json', 'utf8'))['classId'];
-    classId = classId.replace(new RegExp('-', g), '');
+    classId = classId.replace(new RegExp('-', 'g'), '');
 
     // Add a campaign via the mbed Cloud SDK
     updateApi.addCampaign({
