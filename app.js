@@ -15,6 +15,7 @@ var dl = require('delivery');
 // CONFIG (change these)
 var accessKey = process.env.ACCESS_KEY || "ChangeMe";
 var port = process.env.PORT || 8081;
+var host = process.env.HOST || "https://api.mbedcloud.com";
 
 // Paths to resources on the devices
 var blinkResourceURI = '/3201/0/5850';
@@ -28,19 +29,19 @@ var manifest_id = '<undefined>';
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
     apiKey: accessKey,
-    host: 'https://api.us-east-1.mbedcloud.com'
+    host: host
 });
 
 // Instantiate an mbed Cloud device API object
 var updateApi = new mbed.UpdateApi({
     apiKey: accessKey,
-    host: 'https://api.us-east-1.mbedcloud.com'
+    host: host
 });
 
 // Instantiate an mbed Cloud device API object
 var deviceApi = new mbed.DeviceDirectoryApi({
     apiKey: accessKey,
-    host: 'https://api.us-east-1.mbedcloud.com'
+    host: host
 });
 
 // Create the express app
