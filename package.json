@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "async": "^1.5.2",
-    "delivery": "0.0.6",
+    "delivery": "^0.0.6",
     "dotenv": "^2.0.0",
     "express": "^4.13.3",
     "hbs": "~3.1.0",
