@@ -5,152 +5,146 @@
   <title>mbed Cloud Quickstart</title>
 
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" type="text/css" href="/css/material.min.css">
   <link rel="stylesheet" type="text/css" href="/css/custom.css">
 </head>
 
 <body>
 
-  <!-- Icon Bar (Sidebar - hidden on small screens) -->
-  <div class="w3-sidebar w3-bar-block w3-small w3-light-grey w3-hide-small">
-    <a href="#" class="w3-bar-item w3-button w3-padding-large arm-gray-hover w3-center" id="connect_nav">
-      <i class="fa fa-globe w3-xxlarge"></i>
-      <p>Connect</p>
-    </a>
-    <a href="#" class="w3-bar-item w3-button w3-padding-large arm-gray-hover w3-center" id="update_nav">
-      <i class="fa fa-lock w3-xxlarge"></i>
-      <p>Update</p>
-    </a>
-    <a href="#" class="w3-bar-item w3-button w3-padding-large arm-gray-hover w3-center" id="provision_nav">
-      <i class="fa fa-handshake-o w3-xxlarge"></i>
-      <p>Provision</p>
-    </a>
-  </div>
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
+    <header class="mdl-layout__header mdl-color--primary">
+      <div class="mdl-layout__header-row">
+        <!-- Title -->
+        <span class="mdl-layout-title" style="margin-left:-50px">mbed Cloud Quickstart</span>
+      </div>
+      <!-- Tabs -->
+      <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+        <a href="/#connect" class="mdl-layout__tab is-active" id="connect_nav">Connect</a>
+        <a href="/#update" class="mdl-layout__tab" id="update_nav">Update</a>
+        <a href="/#provision" class="mdl-layout__tab" id="provision_nav">Provision</a>
+      </div>
+    </header>
 
-  <!-- Navbar on small screens (Hidden on medium and large screens) -->
-  <div class="w3-top w3-hide-large w3-hide-medium w3-light-grey">
-    <div class="w3-bar w3-center w3-small">
-      <a href="#" class="w3-bar-item w3-button arm-blue-hover" id="connect_nav_small">Connect</a>
-      <a href="#" class="w3-bar-item w3-button arm-blue-hover" id="update_nav_small">Update</a>
-      <a href="#" class="w3-bar-item w3-button arm-blue-hover" id="provision_nav_small">Provision</a>
-    </div>
-  </div>
+    <main class="mdl-layout__content" id="main">
 
-  <!-- Page Content -->
-  <div id="main">
-
-    <!-- Header/Home -->
-    <span class="w3-hide-small">
-      <header class="w3-container arm-blue-no-hover" id="quickstart">
-        <h1>mbed Cloud Quickstart</h1>
-      </header>
-    </span>
-
-    <div class="w3-container">
-      <div class="w3-content w3-justify w3-text-grey w3-padding-32" id="connect">
-        <h2 class="w3-text-dark-grey">Connect API</h2>
-
-        <div id="devices">
+      <section class="mdl-layout__tab-panel is-active" id="connect" style="width:75%;margin:auto;">
+        <div id="devices" style="margin-top:30px;">
           {{#each devices}}
 
-            <div class="w3-card-4 w3-white w3-center w3-margin-bottom" id="{{id}}">
-              <header class="w3-container arm-gray w3-text-white ">
-                <h2>{{id}}</h2>
+            <div class="mdl-card mdl-shadow--6dp" style="width:95%;margin:auto;" id="{{id}}">
+              <header class="mdl-card__title mdl-card--border mdl-color--accent">
+                <h2 class="mdl-card__title-text mdl-color-text--white">{{id}}</h2>
               </header>
-              <div class="w3-container">
-                <div class="w3-container w3-padding-16 w3-half w3-white">
-                  <h4>Presses: <span class="presses-value">Unknown</span></h4>
-                  <div class="w3-bar">
-                    <label><input type="checkbox" class="subscribe-presses w3-check">Subscribe</label>
-                    <button class="get-presses w3-button arm-yellow">GET</button>
+
+              <div class="mdl-card__supporting-text mdl-grid">
+                <div class="mdl-cell mdl-cell--6-col">
+                  <h5 style="margin-top:-1px">Presses: <span class="presses-value">Unknown</span></h5>
+                  <div class="mdl-grid custom-content">
+                    <div class="mdl-cell mdl-cell--6-col">
+                      <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                          <input type="checkbox" class="subscribe-presses mdl-switch__input">
+                          <span class="mdl-switch__label">Subscribe</span>
+                        </label>
+                    </div>
+                    <div class="mdl-cell mdl-cell--4-col">
+                      <button class="get-presses mdl-button mdl-js-button mdl-js-ripple-effect
+                                     mdl-button--raised mdl-button--colored">GET</button>
+                    </div>
                   </div>
+
                 </div>
-                <div class="w3-container w3-padding-16 w3-half w3-white">
-                  <h4>LED Blink Pattern</h4>
-                  <div class="w3-bar">
-                    <input type="text" value="{{blinkPattern}}" class="blink-pattern w3-left w3-input w3-border w3-half">
-                    <button class="update-blink-pattern w3-button arm-blue w3-quarter">Update (PUT)</button>
-                    <button class="blink w3-button arm-green w3-quarter">Blink (POST)</button>
+                <div class="mdl-cell mdl-cell--6-col">
+                  <h5 style="margin-top:-1px">LED Blink Pattern</h5>
+                  <div class="mdl-textfield mdl-js-textfield" style="width:100%">
+                    <input type="text" value="{{blinkPattern}}" class="blink-pattern mdl-textfield__input">
+                  </div>
+                  </br>
+                  <div class="custom-content-2">
+                    <button class="update-blink-pattern mdl-button mdl-js-button mdl-js-ripple-effect
+                                 mdl-button--raised mdl-button--colored">Update (PUT)</button>
+                    <button class="blink mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
+                                 mdl-button--accent arm-green">Blink (POST)</button>
                   </div>
                 </div>
               </div>
             </div>
+            </br>
 
             {{else}}
 
-              <div class="w3-card-4 w3-white w3-center w3-margin-bottom" style="margin:0 -16px">
-                <header class="w3-container arm-gray w3-text-white">
-                  <h2>No devices connected</h2>
+              <div class="mdl-card mdl-shadow--6dp" style="width:95%;margin:auto;min-height:0px!important">
+                <header class="mdl-card__title mdl-card--border mdl-color--accent">
+                  <h2 class="mdl-card__title-text mdl-color-text--white">No devices connected</h2>
                 </header>
               </div>
 
           {{/each}}
         </div>
+      </section>
 
-      </div>
-    </div>
-
-    <div class="w3-container">
-
-      <div class="w3-content w3-justify w3-text-grey w3-padding-32" id="update">
-        <h2 class="w3-text-dark-grey">Update API</h2>
-
-        <div class="w3-row-padding w3-center" style="margin:0 -16px;">
-          <div class="w3-third">
-            <div class="w3-card w3-margin-bottom">
-              <header class="w3-container arm-gray w3-text-white">
-                <h2>1. Manifest</h2>
+      <section class="mdl-layout__tab-panel" id="update" style="width:75%;margin:auto;">
+        <div class="mdl-grid" style="width:96%;margin-top:15px;">
+          <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-card mdl-shadow--6dp custom-card">
+              <header class="mdl-card__title mdl-card--border mdl-color--accent">
+                <h2 class="mdl-card__title-text mdl-color-text--white">1. Manifest</h2>
               </header>
-              <div class="w3-container w3-padding-large custom-card">
-                <button class="w3-button arm-blue" id="generate-manifest">Generate</button>
-                <p>OR</p>
+              <div class="mdl-card__supporting-text custom-card-content">
+                <button class="mdl-button mdl-js-button mdl-button--raised
+                               mdl-button--colored" id="generate-manifest">Generate</button>
+                <p></p>
                 <input accept=".json" type="file" id="manifest_file_selector">
                 <p></p>
-                <button class="w3-button arm-blue" id="upload-manifest">Upload</button>
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
+                               mdl-button--colored" id="upload-manifest">Upload</button>
               </div>
             </div>
           </div>
-          <div class="w3-third">
-            <div class="w3-card w3-margin-bottom">
-              <header class="w3-container arm-gray w3-text-white">
-                <h2>2. Image</h2>
+          <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-card mdl-shadow--6dp custom-card">
+              <header class="mdl-card__title mdl-card--border mdl-color--accent">
+                <h2 class="mdl-card__title-text mdl-color-text--white">2. Image</h2>
               </header>
-              <div class="w3-container w3-padding-large custom-card">
+              <div class="mdl-card__supporting-text custom-card-content">
                 <input accept=".bin" type="file" id="image_file_selector">
                 <p></p>
-                <button class="w3-button arm-blue" id="upload-image">Upload</button>
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
+                               mdl-button--colored" id="upload-image">Upload</button>
               </div>
             </div>
           </div>
-          <div class="w3-third">
-            <div class="w3-card w3-margin-bottom">
-              <header class="w3-container arm-gray w3-text-white">
-                <h2>3. Campaign</h2>
+          <div class="mdl-cell mdl-cell--4-col">
+            <div class="mdl-card mdl-shadow--6dp custom-card">
+              <header class="mdl-card__title mdl-card--border mdl-color--accent">
+                <h2 class="mdl-card__title-text mdl-color-text--white">3. Campaign</h2>
               </header>
-              <div class="w3-container w3-padding-large custom-card">
-                <button class="w3-button arm-green" id="start-campaign">Start</button>
+              <div class="mdl-card__supporting-text custom-card-content">
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
+                               mdl-button--colored" id="start-campaign">Start</button>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="w3-card">
-          <header class="w3-container arm-gray w3-text-white w3-center">
-            <h2>Console log</h2>
+      </br>
+        <div class="mdl-card mdl-shadow--6dp" style="width:95%;margin:auto;">
+          <header class="mdl-card__title mdl-card--border arm-grey">
+            <h2 class="mdl-card__title-text mdl-color-text--white">Console Log</h2>
           </header>
-          <div id="console-log" class="w3-container w3-padding-16 w3-white scroll">
+          <div id="console-log" class="mdl-card__supporting-text scroll">
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 
-  <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+
+  <a href="https://github.com/ARMmbed/mbed-cloud-sdk-javascript-quickstart" target="_blank" id="view-source" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color-text--white">View Source</a>
+  <script type="text/javascript" src="js/material.min.js"></script>
   <script type="text/javascript" src="js/socket.io.js"></script>
   <script type="text/javascript" src="js/delivery.js"></script>
   <script type="text/javascript" src="js/custom.js"></script>

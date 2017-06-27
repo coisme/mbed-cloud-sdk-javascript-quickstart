@@ -1,97 +1,95 @@
-body, h1,h2,h3,h4,h5,h6 {
-    font-family: "Montserrat", sans-serif
+body {
+    font-family: 'Roboto', sans-serif;
 }
 
-.w3-row-padding img {
-    margin-bottom: 12px
+#view-source {
+  position: fixed;
+  display: block;
+  right: 0;
+  bottom: 0;
+  margin-right: 40px;
+  margin-bottom: 40px;
+  z-index: 900;
 }
-
-/* Set the width of the sidebar to 120px */
-.w3-sidebar {
-    width: 100px;background: #222;
-}
-
-/* Add a left margin to the "page content" that matches the width of the sidebar (120px) */
-#main {
-    margin-left: 100px
-}
-
-/* Remove margins from "page content" on small screens */
-@media only screen and (max-width: 600px) {
-    #main {margin-left: 0}
-}
-
 div.scroll {
     height: 225px;
     overflow: scroll;
 }
-
-.arm-yellow, .arm-yellow-no-hover, .arm-yellow-hover:hover {
-  color:#fff!important;
-  background-color:#F9BD31!important
+.mdl-color--primary {
+  background-color: #128cab !important;
 }
-
-.arm-yellow:hover {
-  color:#fff!important;
-  background-color:#939090!important
+.mdl-color--accent {
+  background-color: rgba(0,195,220,1) !important;
 }
-
-.arm-blue, .arm-blue-no-hover, .arm-blue-hover:hover  {
-  /**background: #128cab; **/
-  color:#fff!important;
-  background-color:#128cab!important
+.mdl-layout__tab-bar {
+  background-color: #159ab5 !important;
 }
-
-.arm-blue:hover {
-  color:#fff!important;
-  background-color:#939090!important
+.mdl-layout__tab-bar .is-active {
+  background-color: #159ab5 !important;
+  filter: brightness(107%);
 }
-
+.is-active::after {
+  background-color: rgba(0,195,220,1) !important;
+}
+.mdl-button--raised.mdl-button--colored, .mdl-button--raised.mdl-button--colored:hover {
+  background-color: #128cab;
+}
+.mdl-button--raised.mdl-button--accent {
+  background-color: rgba(0,195,220,1) !important;
+}
+.mdl-switch.is-checked .mdl-switch__thumb{
+  background-color: #128cab !important;
+}
+.mdl-switch.is-checked .mdl-switch__track{
+  background-color: #128cab !important;
+  opacity: 0.45;
+}
+.mdl-switch__ripple-container .mdl-ripple {
+  background: #128cab;
+  background-color: #128cab;
+}
+.custom-card {
+  width: 100%;
+  margin: auto;
+}
+.custom-card-content {
+  min-height: 150px;
+  margin: auto;
+  padding: 8px;
+  display: flex !important;
+  justify-content: center !important;
+  align-content: center !important;
+  flex-direction: column !important;
+  vertical-align: middle !important;
+}
+.custom-content {
+  display: flex !important;
+  flex-direction: row !important;
+  vertical-align: middle !important;
+}
+.custom-content-2 {
+  align-items: center;
+  justify-content: center;
+}
 .arm-green {
   color:#fff!important;
   background-color:#00a960!important
 }
-
-.arm-green:hover {
+.arm-yellow {
   color:#fff!important;
-  background-color:#939090!important
+  background-color:#F9BD31!important
 }
-
-.arm-red, .arm-red-hover:hover {
-  /**background: #128cab; **/
+.arm-blue {
+  color:#fff!important;
+  background-color:#128cab!important
+}
+.arm-red {
   color:#fff!important;
   background-color:#cf364a!important
 }
-
-.arm-red:hover {
-  /**background: #128cab; **/
-  color:#fff!important;
-  background-color:#939090!important
-}
-
-.arm-gray{
+.arm-grey {
   background: #909393;
 }
-
-.arm-gray-hover:hover {
-  color:#000!important;
-  background: #909393;
-}
-
-.col-container {
-    display: table; /* Make the container element behave like a table */
-    width: 100%; /* Set full-width to expand the whole page */
-}
-
-.col {
-    display: table-cell; /* Make elements inside the container behave like table cells */
-}
-
-.custom-card {
-  display: flex;
-  justify-content:center;
-  align-content:center;
-  flex-direction:column;
-  vertical-align: middle;
-  min-height:220px; /* 120px */
+.no-hover{
+  pointer-events: none;
 }

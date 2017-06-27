@@ -1,36 +1,56 @@
+document.addEventListener('DOMContentLoaded', function() {
+  var hash = window.location.hash.substr(1);
+  console.log(hash)
+  if (hash == "connect") {
+    $('#connect_nav').addClass("is-active");
+    $('#update_nav').removeClass("is-active");
+    $('#connect').show();
+    $('#update').hide();
+  } else if (hash == "update") {
+    $('#update_nav').addClass("is-active");
+    $('#connect_nav').removeClass("is-active");
+    $('#connect').hide();
+    $('#update').show();
+  } else {
+    $('#connect_nav').addClass("is-active");
+    $('#update_nav').removeClass("is-active");
+    $('#connect').show();
+    $('#update').hide();
+  }
+});
+
 $(function() {
   var socket = io();
   $('#update').hide();
   $('#provision').hide();
   $('#provision_nav').hide();
+  $('#provision_nav_small').hide();
   $('#connect_nav').click(function() {
+    $('#connect_nav').addClass("is-active");
+    $('#update_nav').removeClass("is-active");
     $('#connect').show();
     $('#update').hide();
   });
   $('#update_nav').click(function() {
+    $('#update_nav').addClass("is-active");
+    $('#connect_nav').removeClass("is-active");
     $('#connect').hide();
     $('#update').show();
   });
 
-  $('#connect_nav_small').click(function() {
-    $('#connect').show();
-    $('#update').hide();
-  });
-  $('#update_nav_small').click(function() {
-    $('#connect').hide();
-    $('#update').show();
-  });
 
   $('#devices').children().each(function(index, element) {
     var _this = $(this);
     _this.find('.subscribe-presses').change(function() {
       if ($(this).is(":checked")) {
-        _this.find('.get-presses').prop('disabled', true);
+        _this.find('.get-presses').prop("disabled", true);
+        _this.find('.get-presses').addClass("no-hover");
         socket.emit('subscribe-to-presses', {
           device: _this.attr('id')
         });
       } else {
-        _this.find('.get-presses').prop('disabled', false);
+        _this.find('.get-presses').prop("disabled", false);
+        _this.find('.get-presses').removeClass("no-hover");
         socket.emit('unsubscribe-to-presses', {
           device: _this.attr('id')
         });
