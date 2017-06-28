@@ -1,8 +1,14 @@
+/* On page refresh or page load, if an anchor tag exists in the URL, open
+   the corresponding content module (i.e. /#update will tell the website to
+   show the "Update" content div). If no anchor tag is present, the page will
+   load the "Connect" content by default. */
 document.addEventListener('DOMContentLoaded', function() {
   var hash = window.location.hash.substr(1);
   console.log(hash)
   if (hash == "connect") {
+    /* Add CSS class "is-active" to the #connect_nav tab */
     $('#connect_nav').addClass("is-active");
+    /* Remove CSS class "is-active" from the #update_nav tab */
     $('#update_nav').removeClass("is-active");
     $('#connect').show();
     $('#update').hide();
@@ -21,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 $(function() {
   var socket = io();
+
+/* On navigation tab click, show the corresponding div content from it's id. */
   $('#update').hide();
   $('#provision').hide();
   $('#provision_nav').hide();
