@@ -309,7 +309,7 @@ io.on('connection', function (socket) {
   * Start campaign
   **/
   socket.on('start-campaign', function(data) {
-    // Way to generate deviceClass automatically: 
+    // Way to generate deviceClass automatically:
     // uuid(model, uuid(vendor, uuid.DNS)).replace(new RegExp('-', 'g'), '')
 
     // Instead, read the classId object from the manifest json file
