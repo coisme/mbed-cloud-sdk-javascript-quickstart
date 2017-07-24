@@ -1,5 +1,7 @@
 # mbed Cloud Node.js Quickstart
 
+[![CircleCI](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master.svg?style=shield&circle-token=b89e3cc6281d5aa7cd95021d0969c60456603ce6)](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master)
+
 Example Node.js express app that talks to the mbed Device Connector.
 
 ## Getting Started

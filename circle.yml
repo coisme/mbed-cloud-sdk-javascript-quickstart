@@ -1,18 +1,6 @@
 machine:
     node:
         version: 4.8.4
-    environment:
-        QS_BRANCH: new-ui
-
-checkout:
-    post:
-        - git submodule sync
-        - git submodule update --init
-
-dependencies:
-    override:
-        - npm install
-        - npm install eslint
 
 test:
     pre:
