@@ -1,154 +1,198 @@
+<!--
+ mbed Cloud Quickstart
+ Copyright ARM Limited 2017
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
 <!DOCTYPE html>
 <html>
-
 <head>
-  <title>mbed Cloud Quickstart</title>
+    <title>mbed Cloud Quickstart</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" type="text/css" href="/css/material.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
 </head>
+<body class="arm-white">
 
-<body>
+    <div class="container">
 
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
-    <header class="mdl-layout__header mdl-color--primary">
-      <div class="mdl-layout__header-row">
-        <!-- Title -->
-        <span class="mdl-layout-title" style="margin-left:-50px">mbed Cloud Quickstart</span>
-      </div>
-      <!-- Tabs -->
-      <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-        <a href="/#connect" class="mdl-layout__tab is-active" id="connect_nav">Connect</a>
-        <a href="/#update" class="mdl-layout__tab" id="update_nav">Update</a>
-        <a href="/#provision" class="mdl-layout__tab" id="provision_nav">Provision</a>
-      </div>
-    </header>
-
-    <main class="mdl-layout__content" id="main">
-
-      <section class="mdl-layout__tab-panel is-active" id="connect" style="width:75%;margin:auto;">
-        <div id="devices" style="margin-top:30px;">
-          {{#each devices}}
-
-            <div class="mdl-card mdl-shadow--6dp" style="width:95%;margin:auto;" id="{{id}}">
-              <header class="mdl-card__title mdl-card--border mdl-color--accent">
-                <h2 class="mdl-card__title-text mdl-color-text--white">{{id}}</h2>
-              </header>
-
-              <div class="mdl-card__supporting-text mdl-grid">
-                <div class="mdl-cell mdl-cell--6-col">
-                  <h5 style="margin-top:-1px">Presses: <span class="presses-value">Unknown</span></h5>
-                  <div class="mdl-grid custom-content">
-                    <div class="mdl-cell mdl-cell--6-col">
-                      <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
-                          <input type="checkbox" class="subscribe-presses mdl-switch__input">
-                          <span class="mdl-switch__label">Subscribe</span>
-                        </label>
-                    </div>
-                    <div class="mdl-cell mdl-cell--4-col">
-                      <button class="get-presses mdl-button mdl-js-button mdl-js-ripple-effect
-                                     mdl-button--raised mdl-button--colored">GET</button>
-                    </div>
-                  </div>
-
-                </div>
-                <div class="mdl-cell mdl-cell--6-col">
-                  <h5 style="margin-top:-1px">LED Blink Pattern</h5>
-                  <div class="mdl-textfield mdl-js-textfield" style="width:100%">
-                    <input type="text" value="{{blinkPattern}}" class="blink-pattern mdl-textfield__input">
-                  </div>
-                  </br>
-                  <div class="custom-content-2">
-                    <button class="update-blink-pattern mdl-button mdl-js-button mdl-js-ripple-effect
-                                 mdl-button--raised mdl-button--colored">Update (PUT)</button>
-                    <button class="blink mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
-                                 mdl-button--accent arm-green">Blink (POST)</button>
-                  </div>
-                </div>
-              </div>
+        <div class="row title">
+            <div class="ten columns">
+                <h3>mbed Cloud Quickstart</h3>
             </div>
-            </br>
+            <div class="two columns">
+                <select class="u-full-width" id="api-selector" onchange="apiChanged(this)">
+                    <option value="connect">Connect</option>
+                    <option value="update">Update</option>
+                </select>
+            </div>
+        </div>
 
+        <table class="u-full-width" id="connect" HIDDEN>
+
+            {{#each devices}}
+            <tr><td>
+
+                <h4 id="header">{{id}}</h4>
+
+                <div class="row" id={{id}}>
+
+                    <div class="six columns">
+                        <h5>Presses: <span id="{{id}}-presses">Unknown</span></h5>
+                        <label for="subscribePresses">Subscribe
+                        <input type="checkbox" id="subscribePresses" onclick="subscribePresses(this)"></label>
+                        <button id="getPresses" onclick="getPresses(this)">Get presses (GET)</button>
+                    </div>
+
+                    <div class="six columns">
+                        <h5>LED blink pattern</h5>
+                        <label for="blinkPattern">Pattern
+                        <input type="text" placeholder="500:500:500:500" id="blinkPattern" class="u-full-width"></label>
+                        <button id="patternUpdate" onclick="updateBlinkPattern(this)">Update (PUT)</button>
+                        <button class="arm-orange" id="patternBlink" onclick="blink(this)">Blink (POST)</button>
+                    </div>
+
+                </div>
+
+            </td></tr>
             {{else}}
 
-              <div class="mdl-card mdl-shadow--6dp" style="width:95%;margin:auto;min-height:0px!important">
-                <header class="mdl-card__title mdl-card--border mdl-color--accent">
-                  <h2 class="mdl-card__title-text mdl-color-text--white">No devices connected</h2>
-                </header>
-              </div>
+            <h2>No devices found</h2>
 
-          {{/each}}
-        </div>
-      </section>
+        {{/each}}
+        </table>
 
-      <section class="mdl-layout__tab-panel" id="update" style="width:75%;margin:auto;">
-        <div class="mdl-grid" style="width:96%;margin-top:15px;">
-          <div class="mdl-cell mdl-cell--4-col">
-            <div class="mdl-card mdl-shadow--6dp custom-card">
-              <header class="mdl-card__title mdl-card--border mdl-color--accent">
-                <h2 class="mdl-card__title-text mdl-color-text--white">1. Manifest</h2>
-              </header>
-              <div class="mdl-card__supporting-text custom-card-content">
-                <button class="mdl-button mdl-js-button mdl-button--raised
-                               mdl-button--colored" id="generate-manifest">Generate</button>
-                <p></p>
-                <input accept=".json" type="file" id="manifest_file_selector">
-                <p></p>
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
-                               mdl-button--colored" id="upload-manifest">Upload</button>
-              </div>
-            </div>
-          </div>
-          <div class="mdl-cell mdl-cell--4-col">
-            <div class="mdl-card mdl-shadow--6dp custom-card">
-              <header class="mdl-card__title mdl-card--border mdl-color--accent">
-                <h2 class="mdl-card__title-text mdl-color-text--white">2. Image</h2>
-              </header>
-              <div class="mdl-card__supporting-text custom-card-content">
-                <input accept=".bin" type="file" id="image_file_selector">
-                <p></p>
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
-                               mdl-button--colored" id="upload-image">Upload</button>
-              </div>
-            </div>
-          </div>
-          <div class="mdl-cell mdl-cell--4-col">
-            <div class="mdl-card mdl-shadow--6dp custom-card">
-              <header class="mdl-card__title mdl-card--border mdl-color--accent">
-                <h2 class="mdl-card__title-text mdl-color-text--white">3. Campaign</h2>
-              </header>
-              <div class="mdl-card__supporting-text custom-card-content">
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect
-                               mdl-button--colored" id="start-campaign">Start</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </br>
-        <div class="mdl-card mdl-shadow--6dp" style="width:95%;margin:auto;">
-          <header class="mdl-card__title mdl-card--border mdl-color--accent">
-            <h2 class="mdl-card__title-text mdl-color-text--white">Console Log</h2>
-          </header>
-          <div id="console-log" class="mdl-card__supporting-text scroll">
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+        <table class="u-full-width" id="update">
 
+            <tr>
+                <td>
+                    <h4>1. Manifest</h4>
+                    <button class="arm-orange u-full-width" id="generateManifest"
+                            onclick="socket.emit('generate-manifest', {});">Generate</button>
+                </td>
+                <td>
+                    <h4>2. Image</h4>
+                    <button class="arm-orange u-full-width" id="uploadImage"
+                            onclick="document.getElementById('imageFileSelector').click()">Upload</button>
+                </td>
+                <td>
+                    <h4>3. Campaign</h4>
+                    <button class="arm-orange u-full-width" id="startCampaign"
+                            onclick="socket.emit('start-campaign', {});">Start</button>
+                </td>
+            </tr>
 
-  <a href="https://github.com/ARMmbed/mbed-cloud-sdk-javascript-quickstart" target="_blank" id="view-source" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored mdl-color-text--white">View Source</a>
-  <script type="text/javascript" src="js/material.min.js"></script>
-  <script type="text/javascript" src="js/socket.io.js"></script>
-  <script type="text/javascript" src="js/delivery.js"></script>
-  <script type="text/javascript" src="js/custom.js"></script>
+            <tr>
+                <td colspan="3" id="consoleLog"></td>
+            </tr>
 
+        </table>
+
+    </div>
+    <input accept=".bin" type="file" id="imageFileSelector" style="display: none;" onchange="uploadImage(this)">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+<script>
+    var socket = io();
+    var tabs = ["connect", "update"];
+
+    function apiChanged(element) {
+        tabs.forEach(function(tab) {
+            document.getElementById(tab).style.display = element.value==tab ? "initial" : "none";
+        });
+    }
+
+    function uploadImage(element) {
+        console.log("hi");
+    }
+
+    function getPresses(element) {
+        socket.emit('get-presses', {
+            device: element.parentElement.parentElement.id
+        });
+    }
+
+    function subscribePresses(element) {
+        var verb = element.is(":checked") ? 'subscribe-to-presses' : 'unsubscribe-to-presses';
+        socket.emit(verb, {
+            device: element.parentElement.parentElement.id
+        });
+    }
+
+    function updateBlinkPattern(element) {
+        socket.emit('update-blink-pattern', {
+            device: element.parentElement.parentElement.id,
+            blinkPattern: element.val()
+        });
+    }
+
+    function blink(element) {
+        socket.emit('blink', {
+            device: element.parentElement.parentElement.id
+        });
+    }
+
+    socket.on('presses', function(data) {
+        document.getElementById(data.device + "-presses").html(data.value);
+    });
+
+    /*
+     * Stage 1: Manifest
+     */
+    socket.on('generated-manifest', function(data) {
+      var file_path = '/update_default_resources.c';
+      var a = document.createElement('A');
+      a.href = file_path;
+      a.download = file_path.substr(file_path.lastIndexOf('/') + 1);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    /*
+     * Stage 2: Image
+     */
+    socket.on('connect', function() {
+      var delivery = new Delivery(socket);
+
+      delivery.on('delivery.connect', function(delivery) {
+
+        $("#upload-image").click(function(evt) {
+          var file = document.getElementById('image_file_selector').files[0];
+          delivery.send(file, {
+            name: 'image'
+          });
+          evt.preventDefault();
+        });
+
+        $("#upload-manifest").click(function(evt) {
+          var file = document.getElementById('manifest_file_selector').files[0];
+          delivery.send(file, {
+            name: 'manifest'
+          });
+          evt.preventDefault();
+        });
+      });
+    });
+
+    socket.on('console-log', function(data) {
+        document.getElementById("console-log").append(data);
+    });
+
+</script>
 </body>
-
 </html>
