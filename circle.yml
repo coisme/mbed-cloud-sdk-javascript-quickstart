@@ -13,3 +13,7 @@ dependencies:
     override:
         - npm install
         - npm install eslint
+
+test:
+    pre:
+        - npm run lint
