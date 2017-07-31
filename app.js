@@ -49,12 +49,16 @@ app.get('/', function(req, res) {
 });
 
 // Handle unexpected server errors
-app.use(function(err, req, res) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.stack,
-        error: err
-    });
+app.use(function(err, req, res, next) {
+    if (req.xhr) {
+        res.status(err.status || 500).send({ error: 'Something failed!' });
+        res.render('error', {
+            message: err.stack,
+            error: err
+        });
+    } else {
+        next(err);
+    }
 });
 
 var sockets = [];
@@ -135,12 +139,12 @@ io.on('connection', function(socket) {
      * Generate manifest security files
      */
     socket.on('generate-manifest', function() {
-        exec('rm -rf .update-certificates/; manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error) {
+        exec('manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', 'Error initializing manifest-tool<br>' + error + '<br>');
-                return console.log(error);
+                socket.emit('console-log', '<font color="red">Error initializing manifest-tool<br>' + error + '<br></font>');
+                return;
             }
 
             // Move the credential file to the public folder so a user has access to download it
@@ -149,11 +153,12 @@ io.on('connection', function(socket) {
 
                 // Error reporting
                 if (error) {
-                    socket.emit('console-log', 'Error generating update_default_resources.c<br>' + error + '<br>');
-                    return console.log(error);
+                    socket.emit('console-log', '<font color="red">Error generating update_default_resources.c<br>' + error + '<br></font>');
+                    return;
                 }
 
                 // Send the front webserver the command to download the credential file to the user
+                socket.emit('console-log', '<font color="green">Command run: manifest-tool init<br></font>');
                 socket.emit('console-log', 'manifest-tool generated update_default_resources.c file and downloaded to user<br>');
                 socket.emit('generated-manifest', {});
             });
@@ -186,8 +191,8 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', 'Error saving image binary to disk. ' + error + '<br>');
-                return console.log(error);
+                socket.emit('console-log', '<font color="red">Error saving image binary to disk. ' + error + '<br></font>');
+                return;
             } else {
                 socket.emit('console-log', 'Server saved image binary to disk<br>');
 
@@ -199,11 +204,12 @@ io.on('connection', function(socket) {
 
                     // Error reporting
                     if (error) {
-                        socket.emit('console-log', 'Error uploading image to mbed Cloud. ' + error + '<br>');
-                        return console.log(error);
+                        socket.emit('console-log', '<font color="red">Error uploading image to mbed Cloud. ' + error + '<br></font>');
+                        return;
                     }
 
                     // Use the image URL returned to create a manifest file
+                    socket.emit('console-log', '<font color="green">Command run: addFirmwareImage from Update API<br></font>');
                     socket.emit('console-log', 'Image uploaded to mbed Cloud. URL: ' + image.url + '<br>');
                     image_url = image.url;
                     createManifest(image_url, file.name);
@@ -223,8 +229,8 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', 'Error creating a manifest file. ' + error + '<br>');
-                return console.log(error);
+                socket.emit('console-log', '<font color="red">Error creating a manifest file. ' + error + '<br></font>');
+                return;
             }
 
             socket.emit('console-log', 'Manifest file created and saved to disk<br>');
@@ -236,11 +242,13 @@ io.on('connection', function(socket) {
 
                 // Error reporting
                 if (error) {
-                    socket.emit('console-log', 'Error uploading manifest to mbed Cloud. ' + error + '<br>');
-                    return console.log(error);
+                    socket.emit('console-log', '<font color="red">Error uploading manifest to mbed Cloud. ' + error + '<br></font>');
+                    return;
                 }
 
                 // Save manifest ID for starting a campaign
+                socket.emit('console-log', '<font color="green">Command run: manifest-tool create<br></font>');
+                socket.emit('console-log', '<font color="green">Command run: addFirmwareManifest from Update API<br></font>');
                 socket.emit('console-log', 'Manifest uploaded to mbed Cloud. URL: ' + manifest.url + '<br>');
                 manifest_id = manifest.id;
             });
@@ -256,8 +264,8 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', 'Error saving manifest JSON file to disk. ' + error + '<br>');
-                return console.log(error);
+                socket.emit('console-log', '<font color="red">Error saving manifest JSON file to disk. ' + error + '<br></font>');
+                return;
             } else {
 
                 // Parse json structure for pem, der, and json file contents
@@ -306,9 +314,10 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', 'Error adding a campaign to mbed Cloud. ' + error + '<br>');
-                return console.log(error);
+                socket.emit('console-log', '<font color="red">Error adding a campaign to mbed Cloud. ' + error + '<br></font>');
+                return;
             }
+            socket.emit('console-log', '<font color="green">Command run: addCampaign from Update API<br></font>');
             socket.emit('console-log', 'Campaign added to mbed Cloud. ID: ' + campaign.id + '<br>');
 
             // Start the previously added campaign
@@ -316,10 +325,10 @@ io.on('connection', function(socket) {
 
                 // Error reporting
                 if (error) {
-                    socket.emit('console-log', 'Error starting campaign. ' + error + '<br>');
-                    return console.log(error);
+                    socket.emit('console-log', '<font color="red">Error starting campaign. ' + error + '<br></font>');
+                    return;
                 }
-
+                socket.emit('console-log', '<font color="green">Command run: startCampaign from Update API<br></font>');
                 socket.emit('console-log', 'Campaign started. Started at ' + campaign.startedAt + '<br>');
             });
         });

@@ -42,7 +42,7 @@
             </div>
         </div>
 
-        <table class="u-full-width" id="connect" HIDDEN>
+        <table class="u-full-width" id="connect">
 
             {{#each devices}}
             <tr><td>
@@ -76,7 +76,7 @@
         {{/each}}
         </table>
 
-        <table class="u-full-width" id="update">
+        <table class="u-full-width" id="update" hidden>
 
             <tr>
                 <td>
@@ -97,27 +97,26 @@
             </tr>
 
             <tr>
-                <td colspan="3" id="consoleLog"></td>
+                <td colspan="3" id="consoleLog">
+                    <h5>Console Log</h5>
+                </td>
             </tr>
 
         </table>
 
     </div>
-    <input accept=".bin" type="file" id="imageFileSelector" style="display: none;" onchange="uploadImage(this)">
+    <input accept=".bin" type="file" id="imageFileSelector" style="display: none;" onchange="imageUpload(this)">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+<script type="text/javascript" src="js/delivery.js"></script>
 <script>
     var socket = io();
     var tabs = ["connect", "update"];
 
     function apiChanged(element) {
         tabs.forEach(function(tab) {
-            document.getElementById(tab).style.display = element.value==tab ? "initial" : "none";
+            document.getElementById(tab).style.display = element.value==tab ? "table" : "none";
         });
-    }
-
-    function uploadImage(element) {
-        console.log("hi");
     }
 
     function getPresses(element) {
@@ -127,16 +126,16 @@
     }
 
     function subscribePresses(element) {
-        var verb = element.is(":checked") ? 'subscribe-to-presses' : 'unsubscribe-to-presses';
+        var verb = element.checked ? 'subscribe-to-presses' : 'unsubscribe-to-presses';
         socket.emit(verb, {
-            device: element.parentElement.parentElement.id
+            device: element.parentElement.parentElement.parentElement.id
         });
     }
 
     function updateBlinkPattern(element) {
         socket.emit('update-blink-pattern', {
             device: element.parentElement.parentElement.id,
-            blinkPattern: element.val()
+            blinkPattern: document.getElementById("blinkPattern").value
         });
     }
 
@@ -147,12 +146,9 @@
     }
 
     socket.on('presses', function(data) {
-        document.getElementById(data.device + "-presses").html(data.value);
+        document.getElementById(data.device + "-presses").innerHTML = data.value;
     });
 
-    /*
-     * Stage 1: Manifest
-     */
     socket.on('generated-manifest', function(data) {
       var file_path = '/update_default_resources.c';
       var a = document.createElement('A');
@@ -163,34 +159,24 @@
       document.body.removeChild(a);
     });
 
-    /*
-     * Stage 2: Image
-     */
-    socket.on('connect', function() {
-      var delivery = new Delivery(socket);
+    var delivery = new Delivery(socket);
 
-      delivery.on('delivery.connect', function(delivery) {
-
-        $("#upload-image").click(function(evt) {
-          var file = document.getElementById('image_file_selector').files[0];
-          delivery.send(file, {
+    function imageUpload(element) {
+        var file = element.files[0];
+        delivery.send(file, {
             name: 'image'
-          });
-          evt.preventDefault();
         });
+    }
 
-        $("#upload-manifest").click(function(evt) {
-          var file = document.getElementById('manifest_file_selector').files[0];
-          delivery.send(file, {
+    function manifestUpload() {
+        var file = document.getElementById('manifest_file_selector').files[0];
+        delivery.send(file, {
             name: 'manifest'
-          });
-          evt.preventDefault();
         });
-      });
-    });
-
+    }
     socket.on('console-log', function(data) {
-        document.getElementById("console-log").append(data);
+        var oldText = document.getElementById("consoleLog").innerHTML;
+        document.getElementById("consoleLog").innerHTML = oldText + data;
     });
 
 </script>
