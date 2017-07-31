@@ -9,7 +9,7 @@ var dl = require('delivery');
 
 // CONFIG (change these)
 var accessKey = process.env.MBED_CLOUD_API_KEY || "<access_key>";
-var port = process.env.PORT || 8081;
+var port = process.env.PORT || 8080;
 
 // Paths to resources on the devices
 var blinkResourceURI = '/3201/0/5850';

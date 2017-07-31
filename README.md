@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master.svg?style=shield&circle-token=b89e3cc6281d5aa7cd95021d0969c60456603ce6)](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master)
 
-Example Node.js express app that talks to the mbed Device Connector.
+Javascript quickstart guide for mbed Cloud. 10 minute guide to get you up and running.
 
 ## Getting Started
 
@@ -25,22 +25,19 @@ To install on Linux, you can use a package manager. Instructions for installing 
 
 ## Configuring the App
 
-Before running the app, you need to set some config options. This is done through environment variables or by creating a `.env` file in the root of the project.
+Before running the app, you need to set some config options. This is done through environment variables or by modifying the app directly.
 
 The following variables are available to be configured:
 
-- **ACCESS_KEY** - *(required)* Set this to your Access Key you created in mbed Device Connector. If you do not have an Access Key, see the section [Creating an Access Key](#creating-an-access-key)
+- **MBED_CLOUD_API_KEY** - *(required)* Set this to your API Key you created in mbed Cloud. If you do not have an API Key, see the section [Creating an Access Key](#creating-an-access-key)
 - **PORT** - Set this to override the default port for the app. The default port is **8080**.
 
-The `.env` file format is as follows:
+The application has the following code which can be modified:
 
 ```
-ACCESS_KEY=<My Access Key>
-PORT=8080
+var accessKey = process.env.MBED_CLOUD_API_KEY || "<access_key>";
+var port = process.env.PORT || 8080;
 ```
-
-See the [dotenv](https://github.com/motdotla/dotenv) project page for more information on `.env` configuration.
-
 
 ## Running the App
 
