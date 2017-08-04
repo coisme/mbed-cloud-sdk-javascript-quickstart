@@ -60,10 +60,10 @@
 
                     <div class="six columns">
                         <h5>LED blink pattern</h5>
-                        <label for="blinkPattern">Pattern
-                        <input type="text" placeholder="500:500:500:500" id="blinkPattern" class="u-full-width"></label>
-                        <button id="patternUpdate" onclick="updateBlinkPattern(this)">Update (PUT)</button>
-                        <button class="arm-orange" id="patternBlink" onclick="blink(this)">Blink (POST)</button>
+                        <label for="{{id}}-blinkPattern">Pattern
+                        <input type="text" placeholder="500:500:500:500" id="{{id}}-blinkPattern" class="u-full-width"></label>
+                        <button onclick="updateBlinkPattern(this)">Update (PUT)</button>
+                        <button class="arm-orange" onclick="blink(this)">Blink (POST)</button>
                     </div>
 
                 </div>
@@ -135,7 +135,7 @@
     function updateBlinkPattern(element) {
         socket.emit('update-blink-pattern', {
             device: element.parentElement.parentElement.id,
-            blinkPattern: document.getElementById("blinkPattern").value
+            blinkPattern: document.getElementById(element.parentElement.parentElement.id + "blinkPattern").value
         });
     }
 
