@@ -1,6 +1,8 @@
 # mbed Cloud Node.js Quickstart
 
 [![CircleCI](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master.svg?style=shield&circle-token=b89e3cc6281d5aa7cd95021d0969c60456603ce6)](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master)
+[![Github All Releases](https://img.shields.io/github/downloads/atom/atom/total.svg)](https://github.com/ARMmbed/mbed-cloud-sdk-javascript-quickstart)
+[![npm](https://img.shields.io/npm/v/npm.svg)](https://github.com/ARMmbed/mbed-cloud-sdk-javascript-quickstart)
 
 Javascript quickstart guide for mbed Cloud. 10 minute guide to get you up and running.
 

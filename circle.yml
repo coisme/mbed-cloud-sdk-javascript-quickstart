@@ -1,7 +1,19 @@
-machine:
-    node:
-        version: 4.8.4
-
-test:
-    pre:
-        - npm run lint
+version: 2
+jobs:
+    build:
+        docker:
+            - image: selenium/standalone-firefox:3.3.1
+        steps:
+            - checkout
+            - run: sudo apt-get update -qq && sudo apt-get install -y python python-pip git npm nodejs-legacy cmake make
+            - run: git config --global url.ssh://git@github.com/.insteadOf https://github.com/
+            - run: mkdir ~/.ssh 
+            - run: ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+            - run: npm install --user
+            - run: sudo pip install selenium nose flake8 pexpect mbed-cli click
+            - run: 
+                command: /bin/bash circleci_assets/circle_helper.sh
+                background: true
+            - run: flake8 app.py 
+            - run: /bin/bash circleci_assets/clone_and_compile.sh
+            - run: nosetests circleci_assets/test_webapp.py
