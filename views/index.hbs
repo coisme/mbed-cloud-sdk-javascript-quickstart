@@ -53,17 +53,17 @@
 
                     <div class="six columns">
                         <h5>Presses: <span id="{{id}}-presses">Unknown</span></h5>
-                        <label for="subscribePresses">Subscribe
-                        <input type="checkbox" id="subscribePresses" onclick="subscribePresses(this)"></label>
-                        <button id="getPresses" onclick="getPresses(this)">Get presses (GET)</button>
+                        <label for="{{id}}-subscribePresses">Subscribe
+                        <input type="checkbox" id="{{id}}-subscribePresses" onclick="subscribePresses(this)"></label>
+                        <button id="{{id}}-getPresses" onclick="getPresses(this)">Get presses (GET)</button>
                     </div>
 
                     <div class="six columns">
                         <h5>LED blink pattern</h5>
                         <label for="{{id}}-blinkPattern">Pattern
                         <input type="text" placeholder="500:500:500:500" id="{{id}}-blinkPattern" class="u-full-width"></label>
-                        <button onclick="updateBlinkPattern(this)">Update (PUT)</button>
-                        <button class="arm-orange" onclick="blink(this)">Blink (POST)</button>
+                        <button id="{{id}}-updatePattern" onclick="updateBlinkPattern(this)">Update (PUT)</button>
+                        <button id="{{id}}-blink" class="arm-orange" onclick="blink(this)">Blink (POST)</button>
                     </div>
 
                 </div>
@@ -133,9 +133,10 @@
     }
 
     function updateBlinkPattern(element) {
+        var deviceID = element.parentElement.parentElement.id;
         socket.emit('update-blink-pattern', {
-            device: element.parentElement.parentElement.id,
-            blinkPattern: document.getElementById(element.parentElement.parentElement.id + "blinkPattern").value
+            device: deviceID,
+            blinkPattern: document.getElementById(deviceID + "-blinkPattern").value
         });
     }
 
