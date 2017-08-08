@@ -1,33 +1,33 @@
 {
-  "name": "mbed-cloud-sdk-javascript-quickstart",
-  "version": "1.0.0",
-  "description": "Quickstart example for using the mbed Cloud javascript library.",
-  "license": "Apache-2.0",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "postInstall": "pip install git+https://github.com/mray19027/manifest-tool-restricted.git",
-    "lint": "eslint '**/*.js' --ignore-pattern node_modules/"
-  },
-  "engines": {
-    "node": "4.8.4"
-  },
-  "author": {
-    "name": "Michael Ray",
-    "email": "michael.ray@arm.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/armmbed/mbed-cloud-sdk-javascript-quickstart"
-  },
-  "dependencies": {
-    "express": "^4.13.3",
-    "hbs": "~3.1.0",
-    "mbed-cloud-sdk": "github:armmbed/mbed-cloud-sdk-javascript#1.2.0-alpha",
-    "socket.io": "^1.4.5",
-    "delivery": "^0.0.6"
-  },
-  "devDependencies": {
-    "eslint": "^4.3.0"
-  }
+    "name": "mbed-cloud-sdk-javascript-quickstart",
+    "version": "1.0.0",
+    "description": "Quickstart example for using the mbed Cloud javascript library.",
+    "license": "Apache-2.0",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "postInstall": "pip install git+https://github.com/mray19027/manifest-tool-restricted.git",
+        "lint": "eslint '**/*.js' --ignore-pattern node_modules/"
+    },
+    "engines": {
+        "node": "4.8.4"
+    },
+    "author": {
+        "name": "Michael Ray",
+        "email": "michael.ray@arm.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/armmbed/mbed-cloud-sdk-javascript-quickstart"
+    },
+    "dependencies": {
+        "express": "^4.13.3",
+        "express-fileupload": "^0.1.4",
+        "hbs": "~3.1.0",
+        "mbed-cloud-sdk": "github:armmbed/mbed-cloud-sdk-javascript#1.2.0-alpha",
+        "socket.io": "^1.4.5"
+    },
+    "devDependencies": {
+        "eslint": "^4.3.0"
+    }
 }

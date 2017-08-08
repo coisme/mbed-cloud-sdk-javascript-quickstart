@@ -5,7 +5,7 @@ var express = require('express');
 var mbed = require("mbed-cloud-sdk");
 var exec = require('child_process').exec;
 var fs = require('fs');
-var dl = require('delivery');
+var fileUpload = require('express-fileupload');
 
 // CONFIG (change these)
 var accessKey = process.env.MBED_CLOUD_API_KEY || "<access_key>";
@@ -35,6 +35,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(fileUpload());
 
 app.get('/', function(req, res) {
     connectApi.listConnectedDevices("quickstart")
@@ -166,18 +167,14 @@ io.on('connection', function(socket) {
         });
     });
 
-    /**
-     * File uploaded
-     **/
-    var delivery = dl.listen(socket);
-    delivery.on('receive.success', function(file) {
-        var params = file.params;
-        image_name = file.name.substring(0, file.name.length - 4);
-        socket.emit('console-log', 'Server received file with file name: ' + file.name + '<br>');
-        if (params.name === 'image')
-            uploadImage(file);
-        else if (params.name === 'manifest')
-            uploadManifest(file);
+    app.post('/uploadFile', function(req) {
+        var file = Object.keys(req.files)[0];
+        image_name = req.files[file].name.substring(0, req.files[file].name.length - 4);
+        socket.emit('console-log', 'Server received file with file name: ' + req.files[file].name + '<br>');
+        if (file === 'image')
+            uploadImage(req.files[file]);
+        else if (file === 'manifest')
+            uploadManifest(req.files[file]);
     });
 
     /**
@@ -185,9 +182,8 @@ io.on('connection', function(socket) {
      * @param file Firmware binary to upload to mbed cloud
      **/
     function uploadImage(file) {
-
         // Save the uploaded image on the server
-        fs.writeFile(file.name, file.buffer, function(error) {
+        fs.writeFile(file.name, file.data, function(error) {
 
             // Error reporting
             if (error) {
@@ -260,7 +256,7 @@ io.on('connection', function(socket) {
      * @param file Manifest json file which has the contents of the 3 security files needed
      **/
     function uploadManifest(file) {
-        fs.writeFile(file.name, file.buffer, function(error) {
+        fs.writeFile(file.name, file.data, function(error) {
 
             // Error reporting
             if (error) {
@@ -269,7 +265,7 @@ io.on('connection', function(socket) {
             } else {
 
                 // Parse json structure for pem, der, and json file contents
-                var jsonData = JSON.parse(file.buffer.toString('utf8'));
+                var jsonData = JSON.parse(file.data.toString('utf8'));
                 if (!fs.existsSync('.update-certificates')) {
                     fs.mkdirSync('.update-certificates');
                 }

@@ -159,24 +159,22 @@
       document.body.removeChild(a);
     });
 
-
     function imageUpload(element) {
-        var file = element.files[0];
-
-        var request = new XMLHttpRequest();
-        request.open('POST', '/uploadImage', true);
-
-        form_data = new FormData();
-        form_data.append('image', file);
-        request.send(form_data);
+        sendFile('/uploadFile', 'image', element.files[0]);
     }
 
     function manifestUpload() {
-        var file = document.getElementById('manifest_file_selector').files[0];
-        delivery.send(file, {
-            name: 'manifest'
-        });
+        sendFile('/uploadFile', 'manifest', element.files[0]);
     }
+
+    function sendFile(endpoint, name, file) {
+        var request = new XMLHttpRequest();
+        request.open('POST', endpoint, true);
+        form_data = new FormData();
+        form_data.append(name, file);
+        request.send(form_data);
+    }
+
     socket.on('console-log', function(data) {
         var oldText = document.getElementById("consoleLog").innerHTML;
         document.getElementById("consoleLog").innerHTML = oldText + data;
