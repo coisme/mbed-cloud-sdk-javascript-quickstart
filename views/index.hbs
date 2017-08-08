@@ -108,7 +108,6 @@
     <input accept=".bin" type="file" id="imageFileSelector" style="display: none;" onchange="imageUpload(this)">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
-<script type="text/javascript" src="js/delivery.js"></script>
 <script>
     var socket = io();
     var tabs = ["connect", "update"];
@@ -160,13 +159,16 @@
       document.body.removeChild(a);
     });
 
-    var delivery = new Delivery(socket);
 
     function imageUpload(element) {
         var file = element.files[0];
-        delivery.send(file, {
-            name: 'image'
-        });
+
+        var request = new XMLHttpRequest();
+        request.open('POST', '/uploadImage', true);
+
+        form_data = new FormData();
+        form_data.append('image', file);
+        request.send(form_data);
     }
 
     function manifestUpload() {
