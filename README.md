@@ -25,7 +25,7 @@ To install on Linux, you can use a package manager. Instructions for installing 
 
 ## Configuring the App
 
-Before running the app, you need to set some config options. This is done through environment variables or by modifying the app directly.
+Before running the app, you need to set some config options. This is done through environment variables, by modifying the app directly, or by input arguments as shown in the [Input Arguments](#input-arguments) section.
 
 The following variables are available to be configured:
 
@@ -59,6 +59,14 @@ mbed Cloud Quickstart listening at http://localhost:8080
 ```
 
 Copy and paste the printed URL into your browser and you should see a page listing all of your connected mbed Clients.
+
+### Input arguments
+
+The following input arguments are supported:
+
+`--uploadManifest` - Allows you to upload a `.JSON` file containing manifest `.pem`, `.der`, and `.json` files from the UI instead of generating new credentials
+
+`--apiKey=<MBED_CLOUD_API_KEY>` - Overrides or replaces the environment variable for `MBED_CLOUD_API_KEY`
 
 ## Appendix
 
