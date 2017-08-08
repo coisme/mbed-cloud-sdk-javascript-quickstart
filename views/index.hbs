@@ -81,8 +81,13 @@
             <tr>
                 <td>
                     <h4>1. Manifest</h4>
+                    {{#if uploadManifest}}
+                    <button class="arm-orange u-full-width" id="uploadManifest"
+                            onclick="document.getElementById('manifestFileSelector').click()">Upload</button>
+                    {{else}}
                     <button class="arm-orange u-full-width" id="generateManifest"
                             onclick="socket.emit('generate-manifest', {});">Generate</button>
+                    {{/if}}
                 </td>
                 <td>
                     <h4>2. Image</h4>
@@ -106,6 +111,7 @@
 
     </div>
     <input accept=".bin" type="file" id="imageFileSelector" style="display: none;" onchange="imageUpload(this)">
+    <input accept=".json" type="file" id="manifestFileSelector" style="display: none;" onchange="manifestUpload(this)">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
 <script>

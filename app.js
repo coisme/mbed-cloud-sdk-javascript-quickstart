@@ -11,6 +11,18 @@ var fileUpload = require('express-fileupload');
 var accessKey = process.env.MBED_CLOUD_API_KEY || "<access_key>";
 var port = process.env.PORT || 8080;
 
+// Argument parser
+var arg_manifest_upload = false;
+var args = process.argv.splice(process.execArgv.length + 2);
+args.forEach(function (val) {
+
+    if (val.indexOf("uploadManifest")>=0)
+        arg_manifest_upload = true;
+
+    if (val.indexOf("apiKey")>=0)
+        accessKey = val.substr(val.search("=")+1);
+});
+
 // Paths to resources on the devices
 var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
@@ -41,6 +53,7 @@ app.get('/', function(req, res) {
     connectApi.listConnectedDevices("quickstart")
         .then(function(devices) {
             res.render('index', {
+                uploadManifest: arg_manifest_upload ? "true" : "",
                 devices: devices
             });
         })
@@ -294,14 +307,6 @@ io.on('connection', function(socket) {
             deviceFilter: {
                 state: {
                     $eq: "registered"
-                },
-                createdAt: {
-                    $gte: new Date("01-01-2017"),
-                    $lte: new Date("01-01-2020")
-                },
-                updatedAt: {
-                    $gte: new Date("01-01-2017"),
-                    $lte: new Date("01-01-2020")
                 },
                 deviceClass: classId
             },
