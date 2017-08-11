@@ -35,7 +35,7 @@
                 <h3>mbed Cloud Quickstart</h3>
             </div>
             <div class="two columns">
-                <select class="u-full-width" id="api-selector" onchange="apiChanged(this)">
+                <select class="u-full-width" id="api-selector" onchange="window.location.href='/#'+this.value; apiChanged(this);">
                     <option value="connect">Connect</option>
                     <option value="update">Update</option>
                 </select>
@@ -117,6 +117,16 @@
 <script>
     var socket = io();
     var tabs = ["connect", "update"];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        var hash = window.location.hash.substr(1);
+        if (hash != "") {
+            document.getElementById('api-selector').value = hash;
+            tabs.forEach(function(tab) {
+                document.getElementById(tab).style.display = hash==tab ? "table" : "none";
+            });
+        }
+    });
 
     function apiChanged(element) {
         tabs.forEach(function(tab) {
