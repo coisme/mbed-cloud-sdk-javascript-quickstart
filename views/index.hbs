@@ -76,7 +76,7 @@
         {{/each}}
         </table>
 
-        <table class="u-full-width" id="update" hidden>
+        <table class="u-full-width" id="update">
 
             <tr>
                 <td>
@@ -125,7 +125,9 @@
             tabs.forEach(function(tab) {
                 document.getElementById(tab).style.display = hash==tab ? "table" : "none";
             });
-        }
+        } else {
+	    document.getElementById("update").style.display = "none";
+	}	
     });
 
     function apiChanged(element) {
