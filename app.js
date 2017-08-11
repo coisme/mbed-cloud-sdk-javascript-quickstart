@@ -180,7 +180,8 @@ io.on('connection', function(socket) {
         });
     });
 
-    app.post('/uploadFile', function(req) {
+    app.post('/uploadFile', function(req, res) {
+        res.status(200).json({ status: "ok" });
         var file = Object.keys(req.files)[0];
         image_name = req.files[file].name.substring(0, req.files[file].name.length - 4);
         socket.emit('console-log', 'Server received file with file name: ' + req.files[file].name + '<br>');
