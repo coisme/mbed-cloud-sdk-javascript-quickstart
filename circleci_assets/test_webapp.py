@@ -8,41 +8,66 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.remote.remote_connection import LOGGER
 
 import logging 
+import sys
 
 elf_name = ("./mbed-cloud-client-example-internal/"
             "__x86_x64_NativeLinux_mbedtls/Debug/mbedCloudClientExample.elf")
 app_command = "node app.js"
 app_success_pattern = 'mbed Cloud Quickstart listening at (.+)'
+webapp_log_name = 'webapp_log.txt'
+client_log_name = 'client_log.txt'
 
 class TestWebApp(object):
-
-    def setup(self):
+    @classmethod
+    def setup_class(cls):
         # Start the web app
-        self.webapp_child = pexpect.spawn(app_command, timeout=25)
+        cls.webapp_child = pexpect.spawn(app_command, timeout=25)
+        cls.webapp_log = open(webapp_log_name, 'wb+')
+        cls.webapp_child.logfile = cls.webapp_log
         try:
-            self.webapp_child.expect(app_success_pattern)
+            cls.webapp_child.expect(app_success_pattern)
         except:
-            assert False, "Web app failed to start"
-        self.url = self.webapp_child.match.group(1)
+            cls.failure("Web app failed to start")
+        cls.url = cls.webapp_child.match.group(1)
 
         # Start the client application
-        self.client_child = pexpect.spawn(elf_name, timeout=7)
-        index = self.client_child.expect(['Endpoint Name: (\w+)', pexpect.EOF, pexpect.TIMEOUT])
+        cls.client_child = pexpect.spawn(elf_name, timeout=7)
+        cls.client_log = open(client_log_name, 'wb+')
+        cls.client_child.logfile = cls.client_log
+        index = cls.client_child.expect(['Endpoint Name: (\w+)', pexpect.EOF, pexpect.TIMEOUT])
         if index > 1:
-            assert False, "Client failed to start"
-        self.endpoint_id = self.client_child.match.group(1)
-
+            cls.failure("Client failed to start")
+        cls.endpoint_id = cls.client_child.match.group(1)
 
         LOGGER.setLevel(logging.WARNING)
         # Start selenium web driver 
-        self.driver = webdriver.Firefox()
-        self.driver.get(self.url)
+        cls.driver = webdriver.Firefox()
+        cls.driver.get(cls.url)
 
-    def teardown(self):
-        self.driver.quit()
-        self.webapp_child.close()
-        self.client_child.close()
-    
+    @classmethod
+    def failure(cls, message):
+        cls.teardown_class()
+        if hasattr(cls, 'client_log'):
+            cls.client_log.close()
+            fd = open(client_log_name,'r+')
+            print "="*5 + "Client log" + "="*5
+            print fd.read()
+        if hasattr(cls, 'webapp_log'):
+            cls.webapp_log.close()
+            fd = open(webapp_log_name,'r+')
+            print "="*5 + "Webapp log" + "="*5
+            print fd.read()
+        assert False, message
+
+    @classmethod
+    def teardown_class(cls):
+        if hasattr(cls, 'driver'):
+            cls.driver.quit()
+        if hasattr(cls, 'webapp_child'):
+            cls.webapp_child.close()
+        if hasattr(cls, 'client_child'):
+            cls.client_child.close()
+   
     def test_put_post(self):
         # Get the div related to the endpoint  
         try:
