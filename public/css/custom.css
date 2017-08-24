@@ -21,10 +21,6 @@ select {
     margin-bottom: 0 !important;
 }
 
-table {
-    table-layout: fixed;
-}
-
 .arm-orange:hover {
     background-color: #F9BD31;
     border-color: #F9BD31;

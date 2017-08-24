@@ -78,29 +78,34 @@
 
         <table class="u-full-width" id="update">
 
-            <tr>
-                <td>
-                    <h4>1. Manifest</h4>
-                    {{#if uploadManifest}}
-                    <button class="arm-orange u-full-width" id="uploadManifest"
-                            onclick="document.getElementById('manifestFileSelector').click()">Upload</button>
-                    {{else}}
-                    <button class="arm-orange u-full-width" id="generateManifest"
-                            onclick="socket.emit('generate-manifest', {});">Generate</button>
-                    {{/if}}
-                </td>
-                <td>
-                    <h4>2. Image</h4>
-                    <button class="arm-orange u-full-width" id="uploadImage"
-                            onclick="document.getElementById('imageFileSelector').click()">Upload</button>
-                </td>
-                <td>
-                    <h4>3. Campaign</h4>
-                    <button class="arm-orange u-full-width" id="startCampaign"
-                            onclick="socket.emit('start-campaign', {});">Start</button>
-                </td>
-            </tr>
-
+            <tr><td>
+                <div class="row">
+                    <div class="one-third column">
+                        <h4>1. Manifest</h4>
+                        <p>Download update certificate to project and compile firmware image</p>
+                        {{#if uploadManifest}}
+                        <button class="arm-orange u-full-width" id="uploadManifest"
+                                onclick="document.getElementById('manifestFileSelector').click()">Upload</button>
+                        {{else}}
+                        <button class="arm-orange u-full-width" id="generateManifest"
+                                onclick="socket.emit('generate-manifest', {});">Generate</button>
+                        {{/if}}
+                    </div>
+                    <div class="one-third column">
+                        <h4>2. Image</h4>
+                        <p>Upload modified firmware image to Mbed Cloud</p>
+                        <button class="arm-orange u-full-width" id="uploadImage"
+                                onclick="document.getElementById('imageFileSelector').click()">Upload</button>
+                    </div>
+                    <div class="one-third column">
+                        <h4>3. Campaign</h4>
+                        <p>Start firmware update campaign</p>
+                        <br>
+                        <button class="arm-orange u-full-width" id="startCampaign"
+                                onclick="socket.emit('start-campaign', {});">Start</button>
+                    </div>
+                </div>    
+            </td></tr>
             <tr>
                 <td colspan="3" id="consoleLog">
                     <h5>Console Log</h5>
