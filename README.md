@@ -73,3 +73,9 @@ The following input arguments are supported:
 ### Creating an Access Key
 
 1. Login to your account at [https://portal.mbedcloud.com/access/keys).
+
+## Running the Docker image
+1. copy your `id_rsa` key file to project folder
+1. `docker build -t webapp-node .`
+1. `docker run -p 8080:8080 webapp-node --apiKey=ACCESS_KEY`
+
