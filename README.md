@@ -1,8 +1,10 @@
-# mbed Cloud Node.js Quickstart
+# mbed Cloud JavaScript Quickstart
 
 [![CircleCI](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master.svg?style=shield&circle-token=b89e3cc6281d5aa7cd95021d0969c60456603ce6)](https://circleci.com/gh/ARMmbed/mbed-cloud-sdk-javascript-quickstart/tree/master)
 
-Javascript quickstart guide for mbed Cloud. 10 minute guide to get you up and running.
+This is a quickstart application for the [mbed-cloud-sdk-javascript](https://github.com/ARMmbed/mbed-cloud-sdk-javascript) package.
+The goal of this application is to get the user up and running, using the mbed-cloud javascript sdk package and talking to devices through mbed cloud client in under 15 min.
+The quickstart webapp is meant to be paired with [mbed cloud client](https://github.com/mbartling/mbed-cloud-client-example-internal).
 
 ## Getting Started
 
@@ -17,11 +19,10 @@ node --version
 npm --version
 ```
 
-If you see an number output similar to x.x.x for each command, then they are both installed and you can continue to the next section.
-
-To install on Windows or Mac, you can download the installer [here](https://nodejs.org/en/download).
-
-To install on Linux, you can use a package manager. Instructions for installing Node.js on your distribution can be found [here](https://nodejs.org/en/download/package-manager)
+### Pre-requisites
+- A [mbed cloud portal](https://portal.mbedcloud.com/) account and have generated an [API token](https://portal.mbedcloud.com/access/keys)
+- A endpoint running the [mbed cloud client example](https://github.com/mbartling/mbed-cloud-client-example-internal)
+- Install the required packages `npm install`
 
 ## Configuring the App
 
@@ -40,11 +41,6 @@ var port = process.env.PORT || 8080;
 ```
 
 ## Running the App
-
-Once you've [configured the app](#configuring-the-app), you need to install its dependencies. Open a terminal or command prompt and run this command:
-```
-npm install
-```
 
 You can now run the app by using the following command:
 
@@ -70,12 +66,7 @@ The following input arguments are supported:
 
 ## Appendix
 
-### Creating an Access Key
-
-1. Login to your account at [https://portal.mbedcloud.com/access/keys).
-
 ## Running the Docker image
 1. copy your `id_rsa` key file to project folder
 1. `docker build -t webapp-node .`
 1. `docker run -p 8080:8080 webapp-node --apiKey=ACCESS_KEY`
-
