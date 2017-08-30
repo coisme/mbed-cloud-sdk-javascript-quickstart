@@ -50,7 +50,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload());
 
 app.get('/', function(req, res) {
-    connectApi.listConnectedDevices("quickstart")
+    connectApi.listConnectedDevices("default")
         .then(function(devices) {
             res.render('index', {
                 uploadManifest: arg_manifest_upload ? "true" : "",
