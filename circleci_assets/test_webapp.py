@@ -9,6 +9,7 @@ from selenium.webdriver.remote.remote_connection import LOGGER
 
 import logging 
 import sys
+import time
 
 elf_name = ("./mbed-cloud-client-example-internal/"
             "__x86_x64_NativeLinux_mbedtls/Debug/mbedCloudClientExample.elf")
@@ -94,9 +95,9 @@ class TestWebApp(object):
         blink_button.click()
        
         # Check output on client side
-        index = self.client_child.expect(['.*LED pattern = (.*)\r\nBlink!', pexpect.EOF, pexpect.TIMEOUT])
-        if index > 0:  
-            assert False, "Device did not receive POST"
+        index = self.client_child.expect(['.*LED pattern = (.*)\r\nVirtual LED toggled', pexpect.EOF, pexpect.TIMEOUT])
+        if index > 0: 
+            self.failure("Device did not receive POST") 
         pattern_rcvd = self.client_child.match.group(1) 
         assert pattern_rcvd.strip() == send_pattern, "Expected %s Got %s"%(send_pattern, pattern_rcvd)        
 
@@ -104,9 +105,8 @@ class TestWebApp(object):
         # Send 5 button clicks
         for i in xrange(5):
             self.client_child.sendline("a")
-            self.client_child.expect(">>")
-            assert (self.client_child.match is not None)
-      
+            time.sleep(0.2)     
+ 
         # Get the div related to the endpoint  
         try:
             endpointElement = self.driver.find_element(by=By.ID, value=self.endpoint_id)  

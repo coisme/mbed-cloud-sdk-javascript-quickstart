@@ -1,9 +1,9 @@
 set -e
 git config --global url.ssh://git@github.com/.insteadOf https://github.com/
-git clone https://github.com/mray19027/mbed-cloud-client-example-internal 
+git clone https://github.com/armmbed/mbed-cloud-client-example-internal 
 cd mbed-cloud-client-example-internal
 mbed deploy --protocol ssh
-mbed update traceless
+mbed update move_resources_to_main
 echo "$CREDENTIAL_FILE" | base64 -d > mbed_cloud_dev_credentials.c
 python pal-platform/pal-platform.py -v deploy --target=x86_x64_NativeLinux_mbedtls generate
 cd __x86_x64_NativeLinux_mbedtls
