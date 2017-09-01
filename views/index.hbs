@@ -104,7 +104,7 @@
                         <button class="arm-orange u-full-width" id="startCampaign"
                                 onclick="socket.emit('start-campaign', {});">Start</button>
                     </div>
-                </div>    
+                </div>
             </td></tr>
             <tr>
                 <td colspan="3" id="consoleLog">
@@ -122,7 +122,7 @@
 <script>
     var socket = io();
     var tabs = ["connect", "update"];
-    
+
     document.addEventListener('DOMContentLoaded', function() {
         var hash = window.location.hash.substr(1);
         if (hash != "") {
@@ -132,7 +132,7 @@
             });
         } else {
 	    document.getElementById("update").style.display = "none";
-	}	
+	}
     });
 
     function apiChanged(element) {
@@ -186,7 +186,7 @@
         sendFile('/uploadFile', 'image', element.files[0]);
     }
 
-    function manifestUpload() {
+    function manifestUpload(element) {
         sendFile('/uploadFile', 'manifest', element.files[0]);
     }
 
