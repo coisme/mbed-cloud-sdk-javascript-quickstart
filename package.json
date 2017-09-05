@@ -6,7 +6,7 @@
     "main": "app.js",
     "scripts": {
         "start": "node app.js",
-        "postinstall": "pip install git+https://github.com/ARMmbed/manifest-tool.git@manifest-tool-1.2-alpha-rc2",
+        "postinstall": "pip install git+https://github.com/ARMmbed/manifest-tool.git@v1.2rc4",
         "lint": "eslint '**/*.js'"
     },
     "engines": {

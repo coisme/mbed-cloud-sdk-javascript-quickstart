@@ -96,13 +96,13 @@ io.on('connection', function(socket) {
 
     socket.on('subscribe-to-presses', function(data) {
         // Subscribe to all changes of resource /3200/0/5501 (button presses)
-        connectApi.addResourceSubscription(data.device, buttonResourceURI, function(error) {
+        connectApi.addResourceSubscription(data.device, buttonResourceURI, function(payload) {
+            buttonPressed(data.device, payload);
+        }, function(error) {
             if (error) throw error;
             socket.emit('subscribed-to-presses', {
                 device: data.device
             });
-        }, function(payload) {
-            buttonPressed(data.device, payload);
         });
     });
 
@@ -184,7 +184,7 @@ io.on('connection', function(socket) {
         res.status(200).json({ status: "ok" });
         var file = Object.keys(req.files)[0];
         image_name = req.files[file].name.substring(0, req.files[file].name.length - 4);
-        socket.emit('console-log', 'Server received file with file name: ' + req.files[file].name + '<br>');
+        socket.emit('console-log', 'Server received file with file name: ' + image_name + '<br>');
         if (file === 'image')
             uploadImage(req.files[file]);
         else if (file === 'manifest')
