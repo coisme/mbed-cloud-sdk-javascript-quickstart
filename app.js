@@ -50,11 +50,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload());
 
 app.get('/', function(req, res) {
-    connectApi.listConnectedDevices("default")
+    connectApi.listConnectedDevices()
         .then(function(devices) {
             res.render('index', {
                 uploadManifest: arg_manifest_upload ? "true" : "",
-                devices: devices
+                devices: devices.data
             });
         })
         .catch(function(error) {
@@ -79,16 +79,6 @@ var sockets = [];
 var server = http.Server(app);
 var io = ioLib(server);
 
-// Callback for when the button is pressed and the subscription service catches the button callback
-function buttonPressed(device, payload) {
-    sockets.forEach(function(socket) {
-        socket.emit('presses', {
-            device: device,
-            value: payload
-        });
-    });
-}
-
 // Setup sockets for updating web UI
 io.on('connection', function(socket) {
     // Add new client to array of client upon connection
@@ -96,13 +86,16 @@ io.on('connection', function(socket) {
 
     socket.on('subscribe-to-presses', function(data) {
         // Subscribe to all changes of resource /3200/0/5501 (button presses)
-        connectApi.addResourceSubscription(data.device, buttonResourceURI, function(payload) {
-            buttonPressed(data.device, payload);
+        var deviceId = data.device;
+        connectApi.addResourceSubscription(deviceId, buttonResourceURI, function(data) {
+            sockets.forEach(function(socket) {
+                socket.emit('presses', {
+                    device: deviceId,
+                    value: data
+                });
+            });
         }, function(error) {
             if (error) throw error;
-            socket.emit('subscribed-to-presses', {
-                device: data.device
-            });
         });
     });
 
