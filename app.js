@@ -3,6 +3,7 @@ var http = require('http');
 var path = require('path');
 var express = require('express');
 var mbed = require("mbed-cloud-sdk");
+var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
 var fs = require('fs');
 var fileUpload = require('express-fileupload');
@@ -50,7 +51,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload());
 
 app.get('/', function(req, res) {
-    connectApi.listConnectedDevices()
+    connectApi.listConnectedDevices({ filter: { deviceType: "quickstart" } } )
         .then(function(devices) {
             res.render('index', {
                 uploadManifest: arg_manifest_upload ? "true" : "",
@@ -88,11 +89,9 @@ io.on('connection', function(socket) {
         // Subscribe to all changes of resource /3200/0/5501 (button presses)
         var deviceId = data.device;
         connectApi.addResourceSubscription(deviceId, buttonResourceURI, function(data) {
-            sockets.forEach(function(socket) {
-                socket.emit('presses', {
-                    device: deviceId,
-                    value: data
-                });
+            socket.emit('presses', {
+                device: deviceId,
+                value: data
             });
         }, function(error) {
             if (error) throw error;
@@ -146,7 +145,7 @@ io.on('connection', function(socket) {
      * Generate manifest security files
      */
     socket.on('generate-manifest', function() {
-        exec('manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error) {
+        exec('manifest-tool init -d "vendor.com" -m "qs v1" --force', function(error) {
 
             // Error reporting
             if (error) {
@@ -227,11 +226,14 @@ io.on('connection', function(socket) {
      * @param fileName local file instance that was uploaded
      **/
     function createManifest(deviceURL, fileName) {
-        var cmd = 'manifest-tool create -u ' + deviceURL + ' -p ' + fileName + ' -o quickstart.manifest';
-        exec(cmd, function(error) {
 
-            // Error reporting
-            if (error) {
+        var manifestExec = spawn("manifest-tool", ['create', '-u', deviceURL, '-p', fileName, '-o', 'quickstart.manifest']);
+        manifestExec.stdin.write('{}\r\n');
+        manifestExec.stdin.end();
+        manifestExec.on('close', function(code) {
+
+            // Error Reporting
+            if (code != 0) {
                 socket.emit('console-log', '<font color="red">Error creating a manifest file. ' + error + '<br></font>');
                 return;
             }
@@ -255,6 +257,7 @@ io.on('connection', function(socket) {
                 socket.emit('console-log', 'Manifest uploaded to mbed Cloud. URL: ' + manifest.url + '<br>');
                 manifest_id = manifest.id;
             });
+
         });
     }
 
