@@ -145,7 +145,7 @@ io.on('connection', function(socket) {
      * Generate manifest security files
      */
     socket.on('generate-manifest', function() {
-        exec('manifest-tool init -d "vendor.com" -m "qs v1" --force', function(error) {
+        exec('manifest-tool init -d "vendor.com" -m "qs v1" -q --force', function(error) {
 
             // Error reporting
             if (error) {
@@ -227,9 +227,7 @@ io.on('connection', function(socket) {
      **/
     function createManifest(deviceURL, fileName) {
 
-        var manifestExec = spawn("manifest-tool", ['create', '-u', deviceURL, '-p', fileName, '-o', 'quickstart.manifest']);
-        manifestExec.stdin.write('{}\r\n');
-        manifestExec.stdin.end();
+        var manifestExec = spawn("manifest-tool", ['create', '-u', deviceURL, '-p', fileName, '-o', 'quickstart.manifest', '-i', 'null.file']);
         manifestExec.on('close', function(code) {
 
             // Error Reporting
