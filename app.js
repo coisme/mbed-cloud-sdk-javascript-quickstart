@@ -85,6 +85,12 @@ io.on('connection', function(socket) {
     // Add new client to array of client upon connection
     sockets.push(socket);
 
+    function sendConsoleLog(message) {
+        sockets.forEach(function(socket) {
+            socket.emit('console-log', message);
+        });
+    }
+
     socket.on('subscribe-to-presses', function(data) {
         // Subscribe to all changes of resource /3200/0/5501 (button presses)
         var deviceId = data.device;
@@ -149,23 +155,23 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', '<font color="red">Error initializing manifest-tool<br>' + error + '<br></font>');
+                sendConsoleLog('<font color="red">Error initializing manifest-tool<br>' + error + '<br></font>');
                 return;
             }
 
             // Move the credential file to the public folder so a user has access to download it
-            socket.emit('console-log', 'manifest-tool executed<br>');
+            sendConsoleLog('manifest-tool executed<br>');
             exec('mv update_default_resources.c public/.', function(error) {
 
                 // Error reporting
                 if (error) {
-                    socket.emit('console-log', '<font color="red">Error generating update_default_resources.c<br>' + error + '<br></font>');
+                    sendConsoleLog('<font color="red">Error generating update_default_resources.c<br>' + error + '<br></font>');
                     return;
                 }
 
                 // Send the front webserver the command to download the credential file to the user
-                socket.emit('console-log', '<font color="green">Command run: manifest-tool init<br></font>');
-                socket.emit('console-log', 'manifest-tool generated update_default_resources.c file and downloaded to user<br>');
+                sendConsoleLog('<font color="green">Command run: manifest-tool init<br></font>');
+                sendConsoleLog('manifest-tool generated update_default_resources.c file and downloaded to user<br>');
                 socket.emit('generated-manifest', {});
             });
 
@@ -176,7 +182,7 @@ io.on('connection', function(socket) {
         res.status(200).json({ status: "ok" });
         var file = Object.keys(req.files)[0];
         image_name = req.files[file].name.substring(0, req.files[file].name.length - 4);
-        socket.emit('console-log', 'Server received file with file name: ' + image_name + '<br>');
+        sendConsoleLog('Server received file with file name: ' + image_name + '<br>');
         if (file === 'image')
             uploadImage(req.files[file]);
         else if (file === 'manifest')
@@ -193,10 +199,10 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', '<font color="red">Error saving image binary to disk. ' + error + '<br></font>');
+                sendConsoleLog('<font color="red">Error saving image binary to disk. ' + error + '<br></font>');
                 return;
             } else {
-                socket.emit('console-log', 'Server saved image binary to disk<br>');
+                sendConsoleLog('Server saved image binary to disk<br>');
 
                 // Use mbed SDK to upload the firmware image
                 updateApi.addFirmwareImage({
@@ -206,13 +212,13 @@ io.on('connection', function(socket) {
 
                     // Error reporting
                     if (error) {
-                        socket.emit('console-log', '<font color="red">Error uploading image to mbed Cloud. ' + error + '<br></font>');
+                        sendConsoleLog('<font color="red">Error uploading image to mbed Cloud. ' + error + '<br></font>');
                         return;
                     }
 
                     // Use the image URL returned to create a manifest file
-                    socket.emit('console-log', '<font color="green">Command run: addFirmwareImage from Update API<br></font>');
-                    socket.emit('console-log', 'Image uploaded to mbed Cloud. URL: ' + image.url + '<br>');
+                    sendConsoleLog('<font color="green">Command run: addFirmwareImage from Update API<br></font>');
+                    sendConsoleLog('Image uploaded to mbed Cloud. URL: ' + image.url + '<br>');
                     image_url = image.url;
                     createManifest(image_url, file.name);
                 });
@@ -232,11 +238,11 @@ io.on('connection', function(socket) {
 
             // Error Reporting
             if (code != 0) {
-                socket.emit('console-log', '<font color="red">Error creating a manifest file. ' + error + '<br></font>');
+                sendConsoleLog('<font color="red">Error creating a manifest file. ' + error + '<br></font>');
                 return;
             }
 
-            socket.emit('console-log', 'Manifest file created and saved to disk<br>');
+            sendConsoleLog('Manifest file created and saved to disk<br>');
             // Upload the manifest file to mbed Cloud
             updateApi.addFirmwareManifest({
                 name: image_name,
@@ -245,14 +251,14 @@ io.on('connection', function(socket) {
 
                 // Error reporting
                 if (error) {
-                    socket.emit('console-log', '<font color="red">Error uploading manifest to mbed Cloud. ' + error + '<br></font>');
+                    sendConsoleLog('<font color="red">Error uploading manifest to mbed Cloud. ' + error + '<br></font>');
                     return;
                 }
 
                 // Save manifest ID for starting a campaign
-                socket.emit('console-log', '<font color="green">Command run: manifest-tool create<br></font>');
-                socket.emit('console-log', '<font color="green">Command run: addFirmwareManifest from Update API<br></font>');
-                socket.emit('console-log', 'Manifest uploaded to mbed Cloud. URL: ' + manifest.url + '<br>');
+                sendConsoleLog('<font color="green">Command run: manifest-tool create<br></font>');
+                sendConsoleLog('<font color="green">Command run: addFirmwareManifest from Update API<br></font>');
+                sendConsoleLog('Manifest uploaded to mbed Cloud. URL: ' + manifest.url + '<br>');
                 manifest_id = manifest.id;
             });
 
@@ -268,7 +274,7 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', '<font color="red">Error saving manifest JSON file to disk. ' + error + '<br></font>');
+                sendConsoleLog('<font color="red">Error saving manifest JSON file to disk. ' + error + '<br></font>');
                 return;
             } else {
 
@@ -280,7 +286,7 @@ io.on('connection', function(socket) {
                 fs.writeFile('.manifest_tool.json', JSON.stringify(jsonData.json));
                 fs.writeFile('.update-certificates/default.key.pem', jsonData.pem);
                 fs.writeFile('.update-certificates/default.der', new Buffer(jsonData.der, 'base64'));
-                socket.emit('console-log', 'Saved PEM, DER and JSON file data to disk<br>');
+                sendConsoleLog('Saved PEM, DER and JSON file data to disk<br>');
             }
         });
     }
@@ -310,22 +316,22 @@ io.on('connection', function(socket) {
 
             // Error reporting
             if (error) {
-                socket.emit('console-log', '<font color="red">Error adding a campaign to mbed Cloud. ' + error + '<br></font>');
+                sendConsoleLog('<font color="red">Error adding a campaign to mbed Cloud. ' + error + '<br></font>');
                 return;
             }
-            socket.emit('console-log', '<font color="green">Command run: addCampaign from Update API<br></font>');
-            socket.emit('console-log', 'Campaign added to mbed Cloud. ID: ' + campaign.id + '<br>');
+            sendConsoleLog('<font color="green">Command run: addCampaign from Update API<br></font>');
+            sendConsoleLog('Campaign added to mbed Cloud. ID: ' + campaign.id + '<br>');
 
             // Start the previously added campaign
             updateApi.startCampaign(campaign.id, function(error) {
 
                 // Error reporting
                 if (error) {
-                    socket.emit('console-log', '<font color="red">Error starting campaign. ' + error + '<br></font>');
+                    sendConsoleLog('<font color="red">Error starting campaign. ' + error + '<br></font>');
                     return;
                 }
-                socket.emit('console-log', '<font color="green">Command run: startCampaign from Update API<br></font>');
-                socket.emit('console-log', 'Campaign started. Started at ' + campaign.startedAt + '<br>');
+                sendConsoleLog('<font color="green">Command run: startCampaign from Update API<br></font>');
+                sendConsoleLog('Campaign started. Started at ' + campaign.startedAt + '<br>');
             });
         });
     });
