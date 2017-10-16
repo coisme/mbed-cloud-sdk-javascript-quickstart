@@ -11,7 +11,7 @@ import logging
 import sys
 import time
 
-elf_name = ("./mbed-cloud-client-example-internal/"
+elf_name = ("./mbed-cloud-client-example-sources-internal/"
             "__x86_x64_NativeLinux_mbedtls/Debug/mbedCloudClientExample.elf")
 app_command = "node app.js"
 app_success_pattern = 'mbed Cloud Quickstart listening at (.+)'
