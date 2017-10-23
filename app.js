@@ -161,19 +161,12 @@ io.on('connection', function(socket) {
 
             // Move the credential file to the public folder so a user has access to download it
             sendConsoleLog('manifest-tool executed<br>');
-            exec('mv update_default_resources.c public/.', function(error) {
 
-                // Error reporting
-                if (error) {
-                    sendConsoleLog('<font color="red">Error generating update_default_resources.c<br>' + error + '<br></font>');
-                    return;
-                }
-
-                // Send the front webserver the command to download the credential file to the user
-                sendConsoleLog('<font color="green">Command run: manifest-tool init<br></font>');
-                sendConsoleLog('manifest-tool generated update_default_resources.c file and downloaded to user<br>');
-                socket.emit('generated-manifest', {});
-            });
+            fs.rename("update_default_resources.c","public/update_default_resources.c");
+            // Send the front webserver the command to download the credential file to the user
+            sendConsoleLog('<font color="green">Command run: manifest-tool init<br></font>');
+            sendConsoleLog('manifest-tool generated update_default_resources.c file and downloaded to user<br>');
+            socket.emit('generated-manifest', {});
 
         });
     });
