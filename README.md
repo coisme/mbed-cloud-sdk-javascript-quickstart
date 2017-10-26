@@ -32,12 +32,14 @@ The following variables are available to be configured:
 
 - **MBED_CLOUD_API_KEY** - *(required)* Set this to your API Key you created in mbed Cloud. If you do not have an API Key, see the section [Creating an Access Key](#creating-an-access-key)
 - **PORT** - Set this to override the default port for the app. The default port is **8080**.
+- **MBED_CLOUD_HOST** - Set this to change the Mbed Cloud server location
 
 The application has the following code which can be modified:
 
 ```
 var accessKey = process.env.MBED_CLOUD_API_KEY || "<access_key>";
 var port = process.env.PORT || 8080;
+var apiHost = process.env.MBED_CLOUD_HOST || "https://api.mbedcloud.com";
 ```
 
 ## Running the App
@@ -63,6 +65,8 @@ The following input arguments are supported:
 `--uploadManifest` - Allows you to upload a `.JSON` file containing manifest `.pem`, `.der`, and `.json` files from the UI instead of generating new credentials
 
 `--apiKey=<MBED_CLOUD_API_KEY>` - Overrides or replaces the environment variable for `MBED_CLOUD_API_KEY`
+
+`--host=<MBED_CLOUD_HOST>` - Overrides or replaces the environment variable for `MBED_CLOUD_HOST`
 
 ## Appendix
 
