@@ -11,6 +11,7 @@ var fileUpload = require('express-fileupload');
 // CONFIG (change these)
 var accessKey = process.env.MBED_CLOUD_API_KEY || "<access_key>";
 var port = process.env.PORT || 8080;
+var apiHost = process.env.MBED_CLOUD_HOST || "https://api.mbedcloud.com";
 
 // Argument parser
 var arg_manifest_upload = false;
@@ -22,6 +23,9 @@ args.forEach(function (val) {
 
     if (val.indexOf("apiKey")>=0)
         accessKey = val.substr(val.search("=")+1);
+
+    if (val.indexOf("host")>=0)
+        apiHost = val.substr(val.search("=")+1);
 });
 
 // Paths to resources on the devices
@@ -35,12 +39,14 @@ var manifest_id = '<undefined>';
 
 // Instantiate an mbed Cloud device API object
 var connectApi = new mbed.ConnectApi({
-    apiKey: accessKey
+    apiKey: accessKey,
+    host: apiHost
 });
 
 // Instantiate an mbed Cloud device API object
 var updateApi = new mbed.UpdateApi({
-    apiKey: accessKey
+    apiKey: accessKey,
+    host: apiHost
 });
 
 // Create the express app
