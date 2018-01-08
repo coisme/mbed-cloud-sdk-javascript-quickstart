@@ -10,11 +10,13 @@ from selenium.webdriver.remote.remote_connection import LOGGER
 import logging 
 import sys
 import time
+import os
 
-elf_name = ("./mbed-cloud-client-example-sources-internal/"
+elf_name = ("./mbed-cloud-client-example-restricted/"
             "__x86_x64_NativeLinux_mbedtls/Debug/mbedCloudClientExample.elf")
 app_command = "node app.js"
 app_success_pattern = 'mbed Cloud Quickstart listening at (.+)'
+port = os.environ.get("PORT", 8080)
 webapp_log_name = 'webapp_log.txt'
 client_log_name = 'client_log.txt'
 
