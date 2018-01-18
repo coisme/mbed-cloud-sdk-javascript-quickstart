@@ -25,6 +25,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
     <link rel="stylesheet" type="text/css" href="/css/custom.css">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+
+    <style>
+       #map {
+        height: 400px;
+        width: 100%;
+       }
+    </style>
 </head>
 <body class="arm-white">
 
@@ -32,177 +39,46 @@
 
         <div class="row title">
             <div class="ten columns">
-                <h3>Mbed Cloud Quickstart</h3>
-            </div>
-            <div class="two columns">
-                <select class="u-full-width" id="api-selector" onchange="window.location.href='/#'+this.value; apiChanged(this);">
-                    <option value="connect">Connect</option>
-                    <option value="update">Update</option>
-                </select>
+                <h3>Mbed Cloud Tutorial - Asset Tracking</h3>
             </div>
         </div>
 
-        <table class="u-full-width" id="connect">
+        <div id="map">
 
-            {{#each devices}}
-            <tr><td>
+        </div>
 
-                <h4 id="header">{{id}}</h4>
-
-                <div class="row" id={{id}}>
-
-                    <div class="six columns">
-                        <h5>Presses: <span id="{{id}}-presses">Unknown</span></h5>
-                        <label for="{{id}}-subscribePresses">Subscribe
-                        <input type="checkbox" id="{{id}}-subscribePresses" onclick="subscribePresses(this)"></label>
-                        <button id="{{id}}-getPresses" onclick="getPresses(this)">Get presses (GET)</button>
-                    </div>
-
-                    <div class="six columns">
-                        <h5>LED blink pattern</h5>
-                        <label for="{{id}}-blinkPattern">Pattern
-                        <input type="text" placeholder="500:500:500:500" id="{{id}}-blinkPattern" class="u-full-width"></label>
-                        <button id="{{id}}-updatePattern" onclick="updateBlinkPattern(this)">Update (PUT)</button>
-                        <button id="{{id}}-blink" class="arm-orange" onclick="blink(this)">Blink (POST)</button>
-                    </div>
-
-                </div>
-
-            </td></tr>
-            {{else}}
-
-            <h2>No devices found</h2>
-
-        {{/each}}
-        </table>
-
-        <table class="u-full-width" id="update">
-
-            <tr><td>
-                <div class="row">
-                    <div class="one-third column">
-                        <h4>1. Manifest</h4>
-                        <p>Download update certificate to project and compile firmware image</p>
-                        {{#if uploadManifest}}
-                        <button class="arm-orange u-full-width" id="uploadManifest"
-                                onclick="document.getElementById('manifestFileSelector').click()">Upload</button>
-                        {{else}}
-                        <button class="arm-orange u-full-width" id="generateManifest"
-                                onclick="socket.emit('generate-manifest', {});">Generate</button>
-                        {{/if}}
-                    </div>
-                    <div class="one-third column">
-                        <h4>2. Image</h4>
-                        <p>Upload modified firmware image to Mbed Cloud</p>
-                        <button class="arm-orange u-full-width" id="uploadImage"
-                                onclick="document.getElementById('imageFileSelector').click()">Upload</button>
-                    </div>
-                    <div class="one-third column">
-                        <h4>3. Campaign</h4>
-                        <p>Start firmware update campaign</p>
-                        <br>
-                        <button class="arm-orange u-full-width" id="startCampaign"
-                                onclick="socket.emit('start-campaign', {});">Start</button>
-                    </div>
-                </div>
-            </td></tr>
-            <tr>
-                <td colspan="3" id="consoleLog">
-                    <h5>Console Log</h5>
-                </td>
-            </tr>
-
-        </table>
+        {{!-- class="u-full-width" --}}
 
     </div>
-    <input accept=".bin" type="file" id="imageFileSelector" style="display: none;" onchange="imageUpload(this)">
-    <input accept=".json" type="file" id="manifestFileSelector" style="display: none;" onchange="manifestUpload(this)">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
 <script>
+    var map;
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 12,
+            center: {lat: 30.243412, lng: -97.846045}
+        });
+    }
+
     var socket = io();
-    var tabs = ["connect", "update"];
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var hash = window.location.hash.substr(1);
-        if (hash != "") {
-            document.getElementById('api-selector').value = hash;
-            tabs.forEach(function(tab) {
-                document.getElementById(tab).style.display = hash==tab ? "table" : "none";
+    socket.on('coordinate', function(data) {
+        if (data.latitude != "N/A") {
+            var loc = {lat: parseFloat(data.latitude), lng: parseFloat(data.longitude)};
+            var marker = new google.maps.Marker({
+                position: loc,
+                map: map,
+                title: data.device
             });
-        } else {
-	    document.getElementById("update").style.display = "none";
-	}
+            map.panTo(loc);
+        }
     });
 
-    function apiChanged(element) {
-        tabs.forEach(function(tab) {
-            document.getElementById(tab).style.display = element.value==tab ? "table" : "none";
-        });
-    }
-
-    function getPresses(element) {
-        socket.emit('get-presses', {
-            device: element.parentElement.parentElement.id
-        });
-    }
-
-    function subscribePresses(element) {
-        var verb = element.checked ? 'subscribe-to-presses' : 'unsubscribe-to-presses';
-        socket.emit(verb, {
-            device: element.parentElement.parentElement.parentElement.id
-        });
-    }
-
-    function updateBlinkPattern(element) {
-        var deviceID = element.parentElement.parentElement.id;
-        socket.emit('update-blink-pattern', {
-            device: deviceID,
-            blinkPattern: document.getElementById(deviceID + "-blinkPattern").value
-        });
-    }
-
-    function blink(element) {
-        socket.emit('blink', {
-            device: element.parentElement.parentElement.id
-        });
-    }
-
-    socket.on('presses', function(data) {
-        document.getElementById(data.device + "-presses").innerHTML = data.value;
-    });
-
-    socket.on('generated-manifest', function(data) {
-      var file_path = '/update_default_resources.c';
-      var a = document.createElement('A');
-      a.href = file_path;
-      a.download = file_path.substr(file_path.lastIndexOf('/') + 1);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
-
-    function imageUpload(element) {
-        sendFile('/uploadFile', 'image', element.files[0]);
-    }
-
-    function manifestUpload(element) {
-        sendFile('/uploadFile', 'manifest', element.files[0]);
-    }
-
-    function sendFile(endpoint, name, file) {
-        var request = new XMLHttpRequest();
-        request.open('POST', endpoint, true);
-        form_data = new FormData();
-        form_data.append(name, file);
-        request.send(form_data);
-    }
-
-    socket.on('console-log', function(data) {
-        var oldText = document.getElementById("consoleLog").innerHTML;
-        document.getElementById("consoleLog").innerHTML = oldText + data;
-    });
-
+</script>
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxXzjxSFkr9QkKyZ9vPfVqhrwvHvu99IQ&callback=initMap">
 </script>
 </body>
 </html>
