@@ -22,7 +22,7 @@ args.forEach(function (val) {
 
 // Paths to resources on the devices
 var latitudeResourceURI = '/5514/0/0';
-var longitudeResourceURI = '/5514/0/0';
+var longitudeResourceURI = '/5515/0/0';
 
 var connectOptions = {
     apiKey: accessKey

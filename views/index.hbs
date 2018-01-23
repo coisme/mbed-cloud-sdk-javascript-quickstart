@@ -43,18 +43,44 @@
             </div>
         </div>
 
-        <div id="map">
+        <div id="map" class="u-full-width">
 
         </div>
 
-        {{!-- class="u-full-width" --}}
+        <hr>
+
+        <div id="device-table">
+
+            <h4>Connected devices</h4>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Device ID</th><!-- 
+                    <th>Device Name</th> -->
+                    <th>Last updated</th>
+                    <th>Location</th>
+                </tr>
+                {{#each devices}}
+                <tr>
+                    <td>{{id}}</td><!-- 
+                    <td>{{name}}</td> -->
+                    <td>{{updatedAt}}</td>
+                    <td id="{{id}}-location">N/A</td>
+                </tr>
+                {{/each}}
+            </table>
+
+        </div>
 
     </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
 <script>
     var map;
+    var device_archive = {};
 
+    // Initialize the map
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
             zoom: 12,
@@ -65,14 +91,45 @@
     var socket = io();
 
     socket.on('coordinate', function(data) {
-        if (data.latitude != "N/A") {
+        if (data.latitude != "N/A" && data.longitude != "N/A") {
+
+            // Get the GPS location of the device
             var loc = {lat: parseFloat(data.latitude), lng: parseFloat(data.longitude)};
-            var marker = new google.maps.Marker({
-                position: loc,
-                map: map,
-                title: data.device
-            });
             map.panTo(loc);
+
+            // Current device already has a marker. Move the marker to the updated location
+            if (data.device in device_archive) {
+                device_archive[data.device]['marker'].setPosition(loc);
+
+                // Add a point to the polyline
+                var polyline = device_archive[data.device]['line'];
+                var polypath = polyline.getPath();
+                polypath.push(new google.maps.LatLng(loc.lat, loc.lng));
+                polyline.setPath(polypath);
+                device_archive[data.device]['line'] = polyline;
+
+            // Current device does not have a marker on the map. Create one and store it
+            } else {
+                var marker = new google.maps.Marker({
+                    position: loc,
+                    map: map,
+                    title: data.device
+                });
+                var polyline = new google.maps.Polyline({
+                    path: [loc],
+                    goedesic: true,
+                    strokeColor: '#FF0000',
+                    stokeOpacity: 1.0,
+                    strokeWeight: 2,
+                    map: map
+                });
+                device_archive[data.device] = {};
+                device_archive[data.device]['marker'] = marker;
+                device_archive[data.device]['line'] = polyline;
+            }
+
+            // Update the table entry to reflect the new location
+            document.getElementById(data.device + "-location").innerHTML = data.latitude + ", " + data.longitude;
         }
     });
 
