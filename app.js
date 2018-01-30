@@ -23,6 +23,9 @@ args.forEach(function (val) {
 // Paths to resources on the devices
 var latitudeResourceURI = '/5514/0/0';
 var longitudeResourceURI = '/5515/0/0';
+var temperatureResourceURI = '/3303/0/0';
+var altitudeResourceURI = '/3321/0/0';
+var pressureResourceURI = '/3315/0/0';
 
 var connectOptions = {
     apiKey: accessKey
@@ -44,11 +47,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function(req, res) {
     connectApi.listConnectedDevices({ filter: { deviceType: "tutorial-gps" } } )
         .then(function(devices) {
+            devices.data.forEach(function(device) {
+                device.updatedAt = new Date(device.updatedAt).toISOString();
+            });
             res.render('index', {
                 devices: devices.data
             });
             devices.data.forEach(function(device) {
                 var deviceId = device.id;
+
                 connectApi.addResourceSubscription(deviceId, latitudeResourceURI, function(value) {
                     var latitude = value;
                     connectApi.getResourceValue(deviceId, longitudeResourceURI, function(error, value) {
@@ -60,6 +67,40 @@ app.get('/', function(req, res) {
                                 latitude: latitude,
                                 longitude: longitude
                             });
+                        });
+                    });
+                });
+
+                connectApi.addResourceSubscription(deviceId, temperatureResourceURI, function(value) {
+                    if (error) throw error;
+                    console.log(value);
+                    var temperature = value;
+                    sockets.forEach(function(socket) {
+                        socket.emit('temp', {
+                            device: deviceId,
+                            temp: temperature
+                        });
+                    });
+                });
+
+                connectApi.addResourceSubscription(deviceId, altitudeResourceURI, function(value) {
+                    if (error) throw error;
+                    var altitude = value;
+                    sockets.forEach(function(socket) {
+                        socket.emit('altitude', {
+                            device: deviceId,
+                            altitude: altitude
+                        });
+                    });
+                });
+
+                connectApi.addResourceSubscription(deviceId, pressureResourceURI, function(value) {
+                    if (error) throw error;
+                    var pressure = value;
+                    sockets.forEach(function(socket) {
+                        socket.emit('pressure', {
+                            device: deviceId,
+                            pressure: pressure
                         });
                     });
                 });

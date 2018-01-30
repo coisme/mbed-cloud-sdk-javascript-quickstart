@@ -56,17 +56,21 @@
             <table>
                 <thead>
                 <tr>
-                    <th>Device ID</th><!-- 
-                    <th>Device Name</th> -->
+                    <th>Device ID</th>
                     <th>Last updated</th>
                     <th>Location</th>
+                    <th>Temperature</th>
+                    <th>Altitude</th>
+                    <th>Pressure</th>
                 </tr>
                 {{#each devices}}
                 <tr>
-                    <td>{{id}}</td><!-- 
-                    <td>{{name}}</td> -->
+                    <td>{{id}}</td>
                     <td>{{updatedAt}}</td>
                     <td id="{{id}}-location">N/A</td>
+                    <td id="{{id}}-temp">N/A</td>
+                    <td id="{{id}}-altitude">N/A</td>
+                    <td id="{{id}}-pressure">N/A</td>
                 </tr>
                 {{/each}}
             </table>
@@ -131,6 +135,21 @@
             // Update the table entry to reflect the new location
             document.getElementById(data.device + "-location").innerHTML = data.latitude + ", " + data.longitude;
         }
+    });
+
+    socket.on('temp', function(data) {
+        // Update the table entry to reflect the new temp
+        document.getElementById(data.device + "-temp").innerHTML = data.temp;
+    });
+
+    socket.on('altitude', function(data) {
+        // Update the table entry to reflect the new altitude
+        document.getElementById(data.device + "-altitude").innerHTML = data.altitude;
+    });
+
+    socket.on('pressure', function(data) {
+        // Update the table entry to reflect the new pressure
+        document.getElementById(data.device + "-pressure").innerHTML = data.pressure;
     });
 
 </script>
