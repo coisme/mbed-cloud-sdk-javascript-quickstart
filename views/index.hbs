@@ -34,12 +34,6 @@
             <div class="ten columns">
                 <h3>Mbed Cloud Quickstart</h3>
             </div>
-            <div class="two columns">
-                <select class="u-full-width" id="api-selector" onchange="window.location.href='/#'+this.value; apiChanged(this);">
-                    <option value="connect">Connect</option>
-                    <option value="update">Update</option>
-                </select>
-            </div>
         </div>
 
         <table class="u-full-width" id="connect">
@@ -76,70 +70,11 @@
         {{/each}}
         </table>
 
-        <table class="u-full-width" id="update">
-
-            <tr><td>
-                <div class="row">
-                    <div class="one-third column">
-                        <h4>1. Manifest</h4>
-                        <p>Download update certificate to project and compile firmware image</p>
-                        {{#if uploadManifest}}
-                        <button class="arm-orange u-full-width" id="uploadManifest"
-                                onclick="document.getElementById('manifestFileSelector').click()">Upload</button>
-                        {{else}}
-                        <button class="arm-orange u-full-width" id="generateManifest"
-                                onclick="socket.emit('generate-manifest', {});">Generate</button>
-                        {{/if}}
-                    </div>
-                    <div class="one-third column">
-                        <h4>2. Image</h4>
-                        <p>Upload modified firmware image to Mbed Cloud</p>
-                        <button class="arm-orange u-full-width" id="uploadImage"
-                                onclick="document.getElementById('imageFileSelector').click()">Upload</button>
-                    </div>
-                    <div class="one-third column">
-                        <h4>3. Campaign</h4>
-                        <p>Start firmware update campaign</p>
-                        <br>
-                        <button class="arm-orange u-full-width" id="startCampaign"
-                                onclick="socket.emit('start-campaign', {});">Start</button>
-                    </div>
-                </div>
-            </td></tr>
-            <tr>
-                <td colspan="3" id="consoleLog">
-                    <h5>Console Log</h5>
-                </td>
-            </tr>
-
-        </table>
-
     </div>
-    <input accept=".bin" type="file" id="imageFileSelector" style="display: none;" onchange="imageUpload(this)">
-    <input accept=".json" type="file" id="manifestFileSelector" style="display: none;" onchange="manifestUpload(this)">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
 <script>
     var socket = io();
-    var tabs = ["connect", "update"];
-
-    document.addEventListener('DOMContentLoaded', function() {
-        var hash = window.location.hash.substr(1);
-        if (hash != "") {
-            document.getElementById('api-selector').value = hash;
-            tabs.forEach(function(tab) {
-                document.getElementById(tab).style.display = hash==tab ? "table" : "none";
-            });
-        } else {
-	    document.getElementById("update").style.display = "none";
-	}
-    });
-
-    function apiChanged(element) {
-        tabs.forEach(function(tab) {
-            document.getElementById(tab).style.display = element.value==tab ? "table" : "none";
-        });
-    }
 
     function getPresses(element) {
         socket.emit('get-presses', {
@@ -170,37 +105,6 @@
 
     socket.on('presses', function(data) {
         document.getElementById(data.device + "-presses").innerHTML = data.value;
-    });
-
-    socket.on('generated-manifest', function(data) {
-      var file_path = '/update_default_resources.c';
-      var a = document.createElement('A');
-      a.href = file_path;
-      a.download = file_path.substr(file_path.lastIndexOf('/') + 1);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
-
-    function imageUpload(element) {
-        sendFile('/uploadFile', 'image', element.files[0]);
-    }
-
-    function manifestUpload(element) {
-        sendFile('/uploadFile', 'manifest', element.files[0]);
-    }
-
-    function sendFile(endpoint, name, file) {
-        var request = new XMLHttpRequest();
-        request.open('POST', endpoint, true);
-        form_data = new FormData();
-        form_data.append(name, file);
-        request.send(form_data);
-    }
-
-    socket.on('console-log', function(data) {
-        var oldText = document.getElementById("consoleLog").innerHTML;
-        document.getElementById("consoleLog").innerHTML = oldText + data;
     });
 
 </script>

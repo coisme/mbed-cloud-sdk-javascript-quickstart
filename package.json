@@ -6,7 +6,6 @@
     "main": "app.js",
     "scripts": {
         "start": "node app.js",
-        "postinstall": "pip install git+https://github.com/ARMmbed/manifest-tool-restricted.git",
         "lint": "eslint '**/*.js'"
     },
     "engines": {
@@ -22,7 +21,6 @@
     },
     "dependencies": {
         "express": "^4.13.3",
-        "express-fileupload": "^0.1.4",
         "hbs": "~3.1.0",
         "mbed-cloud-sdk": "github:armmbed/mbed-cloud-sdk-javascript#1.2.2",
         "socket.io": "^1.4.5"
