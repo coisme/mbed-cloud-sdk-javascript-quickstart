@@ -45,19 +45,36 @@
 
                 <div class="row" id={{id}}>
 
-                    <div class="six columns">
-                        <h5>Presses: <span id="{{id}}-presses">Unknown</span></h5>
-                        <label for="{{id}}-subscribePresses">Subscribe
-                        <input type="checkbox" id="{{id}}-subscribePresses" onclick="subscribePresses(this)"></label>
-                        <button id="{{id}}-getPresses" onclick="getPresses(this)">Get presses (GET)</button>
+                    <div class="three columns">
+                        <span> OFF / ON</span><br>
+                        <label class="switch">
+                          <input type="checkbox" id="{{id}}-switch" onclick="switchTrigger(this)">
+                          <span class="slider round"></span>
+                        </label>
                     </div>
 
-                    <div class="six columns">
-                        <h5>LED blink pattern</h5>
-                        <label for="{{id}}-blinkPattern">Pattern
-                        <input type="text" placeholder="500:500:500:500" id="{{id}}-blinkPattern" class="u-full-width"></label>
-                        <button id="{{id}}-updatePattern" onclick="updateBlinkPattern(this)">Update (PUT)</button>
-                        <button id="{{id}}-blink" class="arm-orange" onclick="blink(this)">Blink (POST)</button>
+                    <div class="nine columns">
+                        <h5>Power (w/h)</h5>
+                        <div id="chart-{{id}}" style="height: 10em; width:100%;"><svg></svg></div>
+                        <script type="text/javascript">
+                            graph_data['{{id}}'] = []; // add array for device to global graph data object
+
+                            nv.addGraph(function() {
+                                charts['{{id}}'] = nv.models.lineChart().useInteractiveGuideline(false);
+                                charts['{{id}}'].xAxis
+                                    .axisLabel('Time')
+                                    .tickFormat(function(d) { return d3.time.format('%H:%M:%S')(new Date(d)); });
+                                charts['{{id}}'].yAxis
+                                    .axisLabel('Value')
+                                    .tickFormat(d3.format('.1f'));
+
+                                charts['{{id}}'].yDomain([0,4]);
+                                updateChartDatum('{{id}}',() => { return []})
+                                nv.utils.windowResize(charts['{{id}}'].update);
+                                return charts['{{id}}'];
+                            });
+
+                         </script>
                     </div>
 
                 </div>
@@ -73,40 +90,53 @@
     </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
 <script>
     var socket = io();
 
-    function getPresses(element) {
-        socket.emit('get-presses', {
-            device: element.parentElement.parentElement.id
-        });
-    }
-
-    function subscribePresses(element) {
-        var verb = element.checked ? 'subscribe-to-presses' : 'unsubscribe-to-presses';
-        socket.emit(verb, {
-            device: element.parentElement.parentElement.parentElement.id
-        });
-    }
-
-    function updateBlinkPattern(element) {
-        var deviceID = element.parentElement.parentElement.id;
-        socket.emit('update-blink-pattern', {
-            device: deviceID,
-            blinkPattern: document.getElementById(deviceID + "-blinkPattern").value
-        });
-    }
-
-    function blink(element) {
-        socket.emit('blink', {
-            device: element.parentElement.parentElement.id
-        });
-    }
-
-    socket.on('presses', function(data) {
-        document.getElementById(data.device + "-presses").innerHTML = data.value;
+    // update webapp switch with data from board (embedded device -> webapp)
+    socket.on('switchFlip', function(data) {
+        console.log("Switch flipped for "+data.device+" with value "+data.value)
+        // Set checkbox in webapp to match value on device. 0 (off) = false, 1 (on) = true
+        if(data.value == 0){
+            document.getElementById(data.device + "-switch").checked = false;
+        }
+        else if (data.value == 1){
+            document.getElementById(data.device + "-switch").checked = true;
+        }
     });
 
+    // update chart with new values as they come in
+    socket.on('updateChart', function(data){
+        // Add data to graph for device
+        console.log("socket.on.updateChart");
+        console.log("Device: "+data.device+", value : "+data.value);
+        var date = new Date();
+        graph_data[data.device].push({x: date.getTime(), y: data.value}); // add data to dictionary
+        if(graph_data[data.device].length > 10) {
+            graph_data[data.device].shift() // shift data to left, only keep 10 points
+        }
+        updateChartDatum(data.device,function() {
+            return [
+            {
+                // format dictionary to match nvd3 requirements
+                values: graph_data[data.device],
+                key: 'data',
+                color: '#ff7f0e'
+            }]
+        })
+    });
+
+    var graph_data = []; // create global array for graph data. Each entry will be key'd by device ID
+    var charts = []; // global chart object
+    var updateChartDatum = function(id,data) {
+        // console.log(data)
+        d3.select('#chart-'+id+' svg')
+            .datum(data)
+            .transition().duration(500)
+            .call(charts[id]);
+    }
 </script>
 </body>
 </html>
