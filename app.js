@@ -45,7 +45,7 @@ app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res) {
-    connectApi.listConnectedDevices({ filter: { deviceType: "tutorial-gps" } } )
+    connectApi.listConnectedDevices({ filter: { deviceType: "tutorial-location-tracking" } } )
         .then(function(devices) {
             devices.data.forEach(function(device) {
                 device.updatedAt = new Date(device.updatedAt).toISOString();
