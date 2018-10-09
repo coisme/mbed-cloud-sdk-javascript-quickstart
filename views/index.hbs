@@ -38,74 +38,142 @@
 
         <table class="u-full-width" id="connect">
 
-            {{#each devices}}
-            <tr><td>
-
-                <h4 id="header">{{id}}</h4>
-
-                <div class="row" id={{id}}>
-
-                    <div class="six columns">
-                        <h5>Presses: <span id="{{id}}-presses">Unknown</span></h5>
-                        <label for="{{id}}-subscribePresses">Subscribe
-                        <input type="checkbox" id="{{id}}-subscribePresses" onclick="subscribePresses(this)"></label>
-                        <button id="{{id}}-getPresses" onclick="getPresses(this)">Get presses (GET)</button>
-                    </div>
-
-                    <div class="six columns">
-                        <h5>LED blink pattern</h5>
-                        <label for="{{id}}-blinkPattern">Pattern
-                        <input type="text" placeholder="500:500:500:500" id="{{id}}-blinkPattern" class="u-full-width"></label>
-                        <button id="{{id}}-updatePattern" onclick="updateBlinkPattern(this)">Update (PUT)</button>
-                        <button id="{{id}}-blink" class="arm-orange" onclick="blink(this)">Blink (POST)</button>
-                    </div>
-
-                </div>
-
-            </td></tr>
-            {{else}}
-
-            <h2>No devices found</h2>
-
-        {{/each}}
         </table>
+
+        <div class="six columns">
+            <h5>API Key</h5>
+            <label for="apikey">API Key
+            <input type="text" placeholder="Add your key" id="apikey" class="u-full-width"></label>
+            <button id="updateAPIKey" onclick="updateAPIKey(this)">Update</button>
+        </div>
 
     </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+<script src="js/connect.min.js"></script>
 <script>
-    var socket = io();
 
-    function getPresses(element) {
-        socket.emit('get-presses', {
-            device: element.parentElement.parentElement.id
+var accessKey = "default";
+
+// Paths to resources on the devices
+var blinkResourceURI = '/3201/0/5850';
+var blinkPatternResourceURI = '/3201/0/5853';
+var buttonResourceURI = '/3200/0/5501';
+
+var connectOptions = {
+    apiKey: accessKey
+};
+
+// Instantiate an mbed Cloud device API object
+var connectApi = new MbedCloudSDK.ConnectApi(connectOptions);
+
+function generateHomePage() {
+    var table = document.getElementById("connect");
+    table.innerHTML = "";
+
+    connectApi.listConnectedDevices({ filter: { deviceType: "default" } } )
+        .then(function(devices) {
+            devices.data.forEach(function(device) {
+                var row = table.insertRow(0);
+                var cell = row.insertCell(0);
+                var template = `
+                    <tr><td>
+
+                    <h4 id="header">${device.id}</h4>
+
+                    <div class="row" id=${device.id}>
+
+                        <div class="six columns">
+                            <h5>Presses: <span id="${device.id}-presses">Unknown</span></h5>
+                            <label for="${device.id}-subscribePresses">Subscribe
+                            <input type="checkbox" id="${device.id}-subscribePresses" onclick="subscribePresses(this)"></label>
+                            <button id="${device.id}-getPresses" onclick="getPresses(this)">Get presses (GET)</button>
+                        </div>
+
+                        <div class="six columns">
+                            <h5>LED blink pattern</h5>
+                            <label for="${device.id}-blinkPattern">Pattern
+                            <input type="text" placeholder="500:500:500:500" id="${device.id}-blinkPattern" class="u-full-width"></label>
+                            <button id="${device.id}-updatePattern" onclick="updateBlinkPattern(this)">Update (PUT)</button>
+                            <button id="${device.id}-blink" class="arm-orange" onclick="blink(this)">Blink (POST)</button>
+                        </div>
+
+                    </div>
+
+                </td></tr>
+                `;
+                cell.innerHTML = template;
+            })
         });
-    }
+}
 
-    function subscribePresses(element) {
-        var verb = element.checked ? 'subscribe-to-presses' : 'unsubscribe-to-presses';
-        socket.emit(verb, {
-            device: element.parentElement.parentElement.parentElement.id
-        });
-    }
+function getPresses(element) {
+    var deviceId = element.parentElement.parentElement.id;
 
-    function updateBlinkPattern(element) {
-        var deviceID = element.parentElement.parentElement.id;
-        socket.emit('update-blink-pattern', {
-            device: deviceID,
-            blinkPattern: document.getElementById(deviceID + "-blinkPattern").value
-        });
-    }
-
-    function blink(element) {
-        socket.emit('blink', {
-            device: element.parentElement.parentElement.id
-        });
-    }
-
-    socket.on('presses', function(data) {
-        document.getElementById(data.device + "-presses").innerHTML = data.value;
+    // Read data from GET resource /3200/0/5501 (num button presses)
+    connectApi.getResourceValue(deviceId, buttonResourceURI, function(error, value) {
+        if (error) throw error;
+        document.getElementById(deviceId + "-presses").innerHTML = value;
     });
+}
+
+function subscribePresses(element) {
+    var deviceId = element.parentElement.parentElement.parentElement.id;
+
+    if (element.checked) {
+
+        // Subscribe to all changes of resource /3200/0/5501 (button presses)
+        connectApi.addResourceSubscription(deviceId, buttonResourceURI, function(data) {
+            document.getElementById(deviceId + "-presses").innerHTML = data;
+        }, function(error) {
+            if (error) throw error;
+        });
+
+    } else {
+
+        // Unsubscribe from the resource /3200/0/5501 (button presses)
+        connectApi.deleteResourceSubscription(deviceId, buttonResourceURI, function(error) {
+        });
+
+    }
+
+}
+
+function updateBlinkPattern(element) {
+    var deviceID = element.parentElement.parentElement.id;
+    var blinkPattern = document.getElementById(deviceID + "-blinkPattern").value;
+    // Set data on PUT resource /3201/0/5853 (pattern of LED blink)
+    connectApi.setResourceValue(deviceID, blinkPatternResourceURI, blinkPattern, function(error) {
+        if (error) throw error;
+    });
+}
+
+function blink(element) {
+    var deviceID = element.parentElement.parentElement.id;
+    // POST to resource /3201/0/5850 (start blinking LED)
+    connectApi.executeResource(deviceID, blinkResourceURI, function(error) {
+        if (error) throw error;
+    });
+}
+
+function updateAPIKey(element) {
+
+    accessKey = document.getElementById("apikey").value;
+
+    connectOptions = {
+        apiKey: accessKey
+    }
+    
+    connectApi.stopNotifications();
+    // Instantiate an mbed Cloud device API object
+    connectApi = new MbedCloudSDK.ConnectApi(connectOptions);
+    
+    connectApi.startNotifications(function(error) {
+        if (error) throw error;
+        console.log('Updated API Key');
+        generateHomePage();
+    });
+
+}
 
 </script>
 </body>
