@@ -21,8 +21,10 @@
     },
     "dependencies": {
         "express": "^4.13.3",
+        "express-http-proxy": "^1.4.0",
         "hbs": "~3.1.0",
         "mbed-cloud-sdk": "github:armmbed/mbed-cloud-sdk-javascript#1.2.2",
+        "npm": "^6.4.1",
         "socket.io": "^1.4.5"
     },
     "devDependencies": {

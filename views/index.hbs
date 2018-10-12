@@ -59,6 +59,8 @@ var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
 var buttonResourceURI = '/3200/0/5501';
 
+
+
 var connectOptions = {
     apiKey: accessKey
 };
@@ -159,8 +161,12 @@ function updateAPIKey(element) {
 
     accessKey = document.getElementById("apikey").value;
 
+    var host = window.location.hostname; 
+    console.log('Host name is '+host+' , if this is incorrect, please change the connectOptions in the index.hbs file');
+
     connectOptions = {
-        apiKey: accessKey
+        apiKey: accessKey,
+        host: '/proxy'
     }
     
     connectApi.stopNotifications();

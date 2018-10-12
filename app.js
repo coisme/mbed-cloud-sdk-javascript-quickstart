@@ -2,6 +2,7 @@ var http = require('http');
 var path = require('path');
 var express = require('express');
 var mbed = require("mbed-cloud-sdk");
+var proxy = require("express-http-proxy");
 
 var port = process.env.PORT || 8080;
 
@@ -9,7 +10,8 @@ var port = process.env.PORT || 8080;
 var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'),{maxage: 0, etag: false}));
+app.use('/proxy',proxy("https://api.us-east-1.mbedcloud.com"));
 
 app.get('/', function(req, res) {
     res.render('index');
