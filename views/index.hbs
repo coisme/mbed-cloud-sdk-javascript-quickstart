@@ -50,6 +50,11 @@
                         <label for="{{id}}-subscribePresses">Subscribe
                         <input type="checkbox" id="{{id}}-subscribePresses" onclick="subscribePresses(this)"></label>
                         <button id="{{id}}-getPresses" onclick="getPresses(this)">Get presses (GET)</button>
+                        
+                        <h5>Distance: <span id="{{id}}-distance">Unknown</span> [mm]</h5>
+                        <label for="{{id}}-subscribePresses">Subscribe
+                        <input type="checkbox" id="{{id}}-subscribeDistance" onclick="subscribeDistance(this)"></label>
+                        <button id="{{id}}-getDistance" onclick="getDistance(this)">Get distance (GET)</button>
                     </div>
 
                     <div class="six columns">
@@ -89,6 +94,19 @@
         });
     }
 
+    function getDistance(element) {
+        socket.emit('get-distance', {
+            device: element.parentElement.parentElement.id
+        });
+    }
+
+    function subscribeDistance(element) {
+        var verb = element.checked ? 'subscribe-to-distance' : 'unsubscribe-to-distance';
+        socket.emit(verb, {
+            device: element.parentElement.parentElement.parentElement.id
+        });
+    }
+
     function updateBlinkPattern(element) {
         var deviceID = element.parentElement.parentElement.id;
         socket.emit('update-blink-pattern', {
@@ -105,6 +123,10 @@
 
     socket.on('presses', function(data) {
         document.getElementById(data.device + "-presses").innerHTML = data.value;
+    });
+
+    socket.on('distance', function(data) {
+        document.getElementById(data.device + "-distance").innerHTML = data.value;
     });
 
 </script>

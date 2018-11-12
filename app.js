@@ -5,7 +5,7 @@ var express = require('express');
 var mbed = require("mbed-cloud-sdk");
 
 // CONFIG (change these)
-var accessKey = process.env.MBED_CLOUD_API_KEY || "<access_key>";
+var accessKey = process.env.MBED_CLOUD_API_KEY || "<< YOUR API KEY >>";
 var port = process.env.PORT || 8080;
 var apiHost = process.env.MBED_CLOUD_HOST || null;
 
@@ -24,6 +24,7 @@ args.forEach(function (val) {
 var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
 var buttonResourceURI = '/3200/0/5501';
+var distanceResourceURI = '/3330/0/5700';
 
 var connectOptions = {
     apiKey: accessKey
@@ -111,6 +112,40 @@ io.on('connection', function(socket) {
                 value: value
             });
         });
+    });
+
+    socket.on('subscribe-to-distance', function(data) {
+        // Subscribe to all changes of resource /3330/0/5700 (distance)
+        var deviceId = data.device;
+        connectApi.addResourceSubscription(deviceId, distanceResourceURI, function(data) {
+            socket.emit('distance', {
+                device: deviceId,
+                value: data
+            });
+        }, function(error) {
+            if (error) throw error;
+        });
+    });
+
+    socket.on('unsubscribe-to-distance', function(data) {
+        // Unsubscribe from the resource /3330/0/5700 (distance)
+        connectApi.deleteResourceSubscription(data.device, distanceResourceURI, function(error) {
+            if (error) throw error;
+            socket.emit('unsubscribed-to-distance', {
+                device: data.device
+            });
+        });
+    });
+
+    socket.on('get-distance', function(data) {
+        // Read data from GET resource /3300/0/5700 (distance)
+        connectApi.getResourceValue(data.device, distanceResourceURI, function(error, value) {
+            if (error) throw error;
+            socket.emit('distance', {
+                device: data.device,
+                value: value
+            })
+        })
     });
 
     socket.on('update-blink-pattern', function(data) {
