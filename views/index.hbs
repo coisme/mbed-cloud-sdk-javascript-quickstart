@@ -17,7 +17,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mbed Cloud Quickstart</title>
+    <title>Pelion Device Management Quickstart</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
@@ -55,6 +55,16 @@
                         <label for="{{id}}-subscribePresses">Subscribe
                         <input type="checkbox" id="{{id}}-subscribeDistance" onclick="subscribeDistance(this)"></label>
                         <button id="{{id}}-getDistance" onclick="getDistance(this)">Get distance (GET)</button>
+
+                        <h5>Temperature: <span id="{{id}}-temperature">Unknown</span> [&deg;C]</h5>
+                        <label for="{{id}}-subscribeTemperature">Subscribe
+                        <input type="checkbox" id="{{id}}-subscribeTemperature" onclick="subscribeTemperature(this)"></label>
+                        <button id="{{id}}-getTemperature" onclick="getTemperature(this)">Get temperature (GET)</button>
+
+                        <h5>Humidity: <span id="{{id}}-humidity">Unknown</span> [%]</h5>
+                        <label for="{{id}}-subscribeHumidity">Subscribe
+                        <input type="checkbox" id="{{id}}-subscribeHumidity" onclick="subscribeHumidity(this)"></label>
+                        <button id="{{id}}-getHumidity" onclick="getHumidity(this)">Get humidity (GET)</button>
                     </div>
 
                     <div class="six columns">
@@ -107,6 +117,33 @@
         });
     }
 
+    function getTemperature(element) {
+        socket.emit('get-temperature', {
+            device: element.parentElement.parentElement.id
+        });
+    }
+
+    function subscribeTemperature(element) {
+        var verb = element.checked ? 'subscribe-to-temperature' : 'unsubscribe-to-temperature';
+        socket.emit(verb, {
+            device: element.parentElement.parentElement.parentElement.id
+        });
+    }
+
+    function getHumidity(element) {
+        socket.emit('get-humidity', {
+            device: element.parentElement.parentElement.id
+        });
+    }
+
+    function subscribeHumidity(element) {
+        var verb = element.checked ? 'subscribe-to-humidity' : 'unsubscribe-to-humidity';
+        socket.emit(verb, {
+            device: element.parentElement.parentElement.parentElement.id
+        });
+    }
+
+
     function updateBlinkPattern(element) {
         var deviceID = element.parentElement.parentElement.id;
         socket.emit('update-blink-pattern', {
@@ -128,6 +165,15 @@
     socket.on('distance', function(data) {
         document.getElementById(data.device + "-distance").innerHTML = data.value;
     });
+
+    socket.on('temperature', function(data) {
+        document.getElementById(data.device + "-temperature").innerHTML = data.value;
+    });
+
+    socket.on('humidity', function(data) {
+        document.getElementById(data.device + "-humidity").innerHTML = data.value;
+    });
+
 
 </script>
 </body>

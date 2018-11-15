@@ -25,6 +25,8 @@ var blinkResourceURI = '/3201/0/5850';
 var blinkPatternResourceURI = '/3201/0/5853';
 var buttonResourceURI = '/3200/0/5501';
 var distanceResourceURI = '/3330/0/5700';
+var temperatureResourceURI = '/3303/0/5700';
+var humidityResourceURI = '/3304/0/5700';
 
 var connectOptions = {
     apiKey: accessKey
@@ -47,7 +49,7 @@ app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res) {
-    connectApi.listConnectedDevices({ filter: { deviceType: "default" } } )
+    connectApi.listConnectedDevices({ filter: { deviceType: "default", state: {$eq: "registered"} } } )
         .then(function(devices) {
             res.render('index', {
                 devices: devices.data
@@ -142,6 +144,74 @@ io.on('connection', function(socket) {
         connectApi.getResourceValue(data.device, distanceResourceURI, function(error, value) {
             if (error) throw error;
             socket.emit('distance', {
+                device: data.device,
+                value: value
+            })
+        })
+    });
+
+    socket.on('subscribe-to-temperature', function(data) {
+        // Subscribe to all changes of resource /3303/0/5700 (temperature)
+        var deviceId = data.device;
+        connectApi.addResourceSubscription(deviceId, temperatureResourceURI, function(data) {
+            socket.emit('temperature', {
+                device: deviceId,
+                value: data
+            });
+        }, function(error) {
+            if (error) throw error;
+        });
+    });
+
+    socket.on('unsubscribe-to-temperature', function(data) {
+        // Unsubscribe from the resource /3303/0/5700 (temperature)
+        connectApi.deleteResourceSubscription(data.device, temperatureResourceURI, function(error) {
+            if (error) throw error;
+            socket.emit('unsubscribed-to-temperature', {
+                device: data.device
+            });
+        });
+    });
+
+    socket.on('get-temperature', function(data) {
+        // Read data from GET resource /3303/0/5700 (distance)
+        connectApi.getResourceValue(data.device, temperatureResourceURI, function(error, value) {
+            if (error) throw error;
+            socket.emit('temperature', {
+                device: data.device,
+                value: value
+            })
+        })
+    });
+
+    socket.on('subscribe-to-humidity', function(data) {
+        // Subscribe to all changes of resource /3304/0/5700 (humidity)
+        var deviceId = data.device;
+        connectApi.addResourceSubscription(deviceId, humidityResourceURI, function(data) {
+            socket.emit('humidity', {
+                device: deviceId,
+                value: data
+            });
+        }, function(error) {
+            if (error) throw error;
+        });
+    });
+
+    socket.on('unsubscribe-to-humidity', function(data) {
+        // Unsubscribe from the resource /3304/0/5700 (distance)
+        connectApi.deleteResourceSubscription(data.device, humidityResourceURI, function(error) {
+            if (error) throw error;
+            socket.emit('unsubscribed-to-humidity', {
+                device: data.device
+            });
+        });
+    });
+
+    socket.on('get-humidity', function(data) {
+        // Read data from GET resource /3304/0/5700 (distance)
+        connectApi.getResourceValue(data.device, humidityResourceURI, function(error, value) {
+            if (error) throw error;
+            socket.emit('humidity', {
                 device: data.device,
                 value: value
             })
